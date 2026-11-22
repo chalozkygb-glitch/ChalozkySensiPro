@@ -100,9 +100,9 @@
   <div id="gateBox" class="box">
     <h1>SENSI-SYS // CHALOZKY.GB</h1>
     <div class="sub">TERMINAL DE SENSIBILIDAD WEB</div>
-    <label>Código de acceso:</label>
-    <input id="claveInput" type="password" placeholder="Ingresa el código..." />
-    <button id="btnEntrar">VALIDAR ACCESO</button>
+    <label for="claveInput">Código de acceso:</label>
+    <input id="claveInput" type="password" placeholder="Ingresa el código..." autocomplete="off" />
+    <button id="btnEntrar" type="button">VALIDAR ACCESO</button>
     <div id="gateMsg" class="err"></div>
   </div>
 
@@ -142,7 +142,7 @@
 
     <div id="copiadoMsg" class="sub" style="margin-top: 8px;"></div>
   </div>
-
+  
   <script>
     const CLAVE_ACCESO = "CHALOZKY2026";
     const URL_JSON = "https://raw.githubusercontent.com/chalozkygb-glitch/ChalozkySensiPro/main/SENSIBILIDADES.JSON";
@@ -213,4 +213,226 @@
       {"id":"moto_g53","marca":"Motorola","modelo":"Moto G53 5G","gama":"Gama Media","general":185,"puntoRojo":181,"mira2x":172,"mira4x":163,"francotirador":129,"camara":183,"botonDisparo":51,"dpiSugerido":"460","velocidadPuntero":8},
       {"id":"moto_g34","marca":"Motorola","modelo":"Moto G34 5G","gama":"Gama Media","general":186,"puntoRojo":182,"mira2x":173,"mira4x":164,"francotirador":130,"camara":184,"botonDisparo":51,"dpiSugerido":"470","velocidadPuntero":8},
       {"id":"moto_g14","marca":"Motorola","modelo":"Moto G14","gama":"Gama Entrada","general":192,"puntoRojo":188,"mira2x":178,"mira4x":169,"francotirador":136,"camara":190,"botonDisparo":54,"dpiSugerido":"500","velocidadPuntero":8},
-      {"id":"realme_11
+      {"id":"realme_11_pro_plus","marca":"Realme","modelo":"11 Pro+ 5G","gama":"Gama Media Alta","general":178,"puntoRojo":174,"mira2x":165,"mira4x":157,"francotirador":121,"camara":176,"botonDisparo":48,"dpiSugerido":"440","velocidadPuntero":7},
+      {"id":"realme_c55","marca":"Realme","modelo":"C55","gama":"Gama Media","general":187,"puntoRojo":183,"mira2x":174,"mira4x":165,"francotirador":131,"camara":185,"botonDisparo":51,"dpiSugerido":"480","velocidadPuntero":8},
+      {"id":"infinix_hot_40_pro","marca":"Infinix","modelo":"Hot 40 Pro","gama":"Gama Media","general":183,"puntoRojo":179,"mira2x":170,"mira4x":161,"francotirador":127,"camara":181,"botonDisparo":50,"dpiSugerido":"460","velocidadPuntero":8},
+      {"id":"infinix_smart_8","marca":"Infinix","modelo":"Smart 8","gama":"Gama Entrada","general":193,"puntoRojo":189,"mira2x":179,"mira4x":170,"francotirador":138,"camara":191,"botonDisparo":54,"dpiSugerido":"500","velocidadPuntero":8},
+      {"id":"honor_90","marca":"Honor","modelo":"90","gama":"Gama Media Alta","general":178,"puntoRojo":174,"mira2x":165,"mira4x":157,"francotirador":121,"camara":176,"botonDisparo":48,"dpiSugerido":"440","velocidadPuntero":7},
+      {"id":"honor_x7b","marca":"Honor","modelo":"X7b","gama":"Gama Media","general":185,"puntoRojo":181,"mira2x":172,"mira4x":163,"francotirador":129,"camara":183,"botonDisparo":51,"dpiSugerido":"470","velocidadPuntero":8},
+      {"id":"oneplus_12r","marca":"OnePlus","modelo":"12R","gama":"Gama Alta","general":173,"puntoRojo":169,"mira2x":161,"mira4x":153,"francotirador":115,"camara":171,"botonDisparo":46,"dpiSugerido":"440","velocidadPuntero":7},
+      {"id":"oneplus_nord_ce4","marca":"OnePlus","modelo":"Nord CE4","gama":"Gama Media Alta","general":179,"puntoRojo":175,"mira2x":166,"mira4x":158,"francotirador":122,"camara":177,"botonDisparo":48,"dpiSugerido":"450","velocidadPuntero":7},
+      {"id":"vivo_v30","marca":"Vivo","modelo":"V30","gama":"Gama Media Alta","general":178,"puntoRojo":174,"mira2x":165,"mira4x":157,"francotirador":121,"camara":176,"botonDisparo":48,"dpiSugerido":"440","velocidadPuntero":7},
+      {"id":"vivo_y28","marca":"Vivo","modelo":"Y28","gama":"Gama Media","general":187,"puntoRojo":183,"mira2x":174,"mira4x":165,"francotirador":131,"camara":185,"botonDisparo":51,"dpiSugerido":"480","velocidadPuntero":8},
+      {"id":"zte_blade_v50_vita","marca":"ZTE","modelo":"Blade V50 Vita","gama":"Gama Entrada/Media","general":190,"puntoRojo":186,"mira2x":176,"mira4x":168,"francotirador":135,"camara":188,"botonDisparo":53,"dpiSugerido":"490","velocidadPuntero":8},
+      {"id":"huawei_nova_12s","marca":"Huawei","modelo":"Nova 12s","gama":"Gama Media Alta","general":178,"puntoRojo":174,"mira2x":165,"mira4x":157,"francotirador":121,"camara":176,"botonDisparo":48,"dpiSugerido":"440","velocidadPuntero":7},
+      {"id":"iphone_16_pro_max","marca":"Apple","modelo":"iPhone 16 Pro Max","gama":"Flagship","general":171,"puntoRojo":167,"mira2x":159,"mira4x":151,"francotirador":113,"camara":169,"botonDisparo":46,"dpiSugerido":"N/A (iOS)","velocidadPuntero":7},
+      {"id":"iphone_14_pro","marca":"Apple","modelo":"iPhone 14 Pro","gama":"Flagship","general":174,"puntoRojo":170,"mira2x":162,"mira4x":154,"francotirador":116,"camara":172,"botonDisparo":47,"dpiSugerido":"N/A (iOS)","velocidadPuntero":7},
+      {"id":"iphone_12","marca":"Apple","modelo":"iPhone 12","gama":"Flagship","general":178,"puntoRojo":174,"mira2x":165,"mira4x":157,"francotirador":120,"camara":176,"botonDisparo":48,"dpiSugerido":"N/A (iOS)","velocidadPuntero":7},
+      {"id":"iphone_11","marca":"Apple","modelo":"iPhone 11","gama":"Gama Alta","general":181,"puntoRojo":177,"mira2x":168,"mira4x":160,"francotirador":124,"camara":179,"botonDisparo":49,"dpiSugerido":"N/A (iOS)","velocidadPuntero":7}
+    ];
+
+    let dispositivos = [];
+    let listaFiltradaActual = [];
+    let configActual = null;
+
+    const offsetsArma = {
+      versatil: { g: 0, r: 0, m2: 0, m4: 0, f: 0, b: 0 },
+      ar:       { g: 4, r: 5, m2: 2, m4: -2, f: 0, b: -1 },
+      smg:      { g: 10, r: 8, m2: 4, m4: 0, f: 0, b: -2 },
+      tirador:  { g: -5, r: -4, m2: -8, m4: -10, f: -4, b: 1 },
+      escopeta: { g: 8, r: 6, m2: 0, m4: 0, f: 0, b: -2 },
+      franco:   { g: -6, r: -4, m2: -4, m4: -6, f: -14, b: 2 }
+    };
+
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+    function normalizar(texto) {
+      return (texto || "")
+        .toString()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    }
+
+    function unirCatalogos(remotos, respaldo) {
+      const mapa = new Map();
+      (Array.isArray(remotos) ? remotos : []).forEach((item, idx) => {
+        if (!item || !item.modelo) return;
+        const clave = normalizar(`${item.marca || ""} ${item.modelo}`) || `remoto_${idx}`;
+        mapa.set(clave, item);
+      });
+      respaldo.forEach((item, idx) => {
+        const clave = normalizar(`${item.marca || ""} ${item.modelo}`) || `respaldo_${idx}`;
+        if (!mapa.has(clave)) {
+          mapa.set(clave, item);
+        }
+      });
+      return Array.from(mapa.values());
+    }
+
+    document.getElementById("btnEntrar").addEventListener("click", async () => {
+      const val = document.getElementById("claveInput").value.trim();
+      if (val !== CLAVE_ACCESO) {
+        document.getElementById("gateMsg").textContent = "Código incorrecto.";
+        return;
+      }
+      document.getElementById("gateBox").classList.add("hidden");
+      document.getElementById("appBox").classList.remove("hidden");
+      await cargarJson();
+    });
+
+    async function cargarJson() {
+      try {
+        const res = await fetch(URL_JSON, { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const remotos = await res.json();
+        dispositivos = unirCatalogos(remotos, CATALOGO_RESPALDO);
+        document.getElementById("estadoSync").textContent =
+          `ONLINE // ${dispositivos.length} MODELOS DISPONIBLES`;
+      } catch (e) {
+        dispositivos = CATALOGO_RESPALDO;
+        document.getElementById("estadoSync").textContent =
+          `RESPALDO ACTIVO // ${dispositivos.length} MODELOS DISPONIBLES`;
+      }
+      aplicarBusqueda(true);
+    }
+
+    function filtrarLista() {
+      const rawQuery = document.getElementById("buscarInput").value;
+      const terminos = normalizar(rawQuery).split(/\s+/).filter(Boolean);
+      if (terminos.length === 0) return dispositivos;
+
+      return dispositivos.filter(d => {
+        const combinado = normalizar(`${d.marca || ""} ${d.modelo || ""} ${d.gama || ""} ${d.id || ""}`);
+        return terminos.every(t => combinado.includes(t));
+      });
+    }
+
+    function aplicarBusqueda(resetSeleccion = true) {
+      listaFiltradaActual = filtrarLista();
+      const queryTexto = document.getElementById("buscarInput").value.trim();
+      const contador = document.getElementById("contadorResultados");
+      const sinMatchBox = document.getElementById("sinCoincidenciaBox");
+      const panelConfig = document.getElementById("panelConfig");
+      const sel = document.getElementById("modeloSelect");
+
+      if (listaFiltradaActual.length === 0) {
+        contador.textContent = "0 coincidencias encontradas";
+        sel.classList.add("hidden");
+        panelConfig.classList.add("hidden");
+        sinMatchBox.classList.remove("hidden");
+        document.getElementById("textoModeloSolicitado").textContent =
+          `Buscaste: "${queryTexto}". Copia este aviso para sumarlo al catálogo.`;
+        document.getElementById("gamaInfo").textContent = "";
+        configActual = null;
+        return;
+      }
+
+      sinMatchBox.classList.add("hidden");
+      sel.classList.remove("hidden");
+      panelConfig.classList.remove("hidden");
+
+      contador.textContent = queryTexto
+        ? `${listaFiltradaActual.length} coincidencia(s) para "${queryTexto}"`
+        : `Mostrando todos los modelos (${listaFiltradaActual.length})`;
+
+      const indicePrevio = Number(sel.value || 0);
+      sel.innerHTML = "";
+      listaFiltradaActual.forEach((d, idx) => {
+        const opt = document.createElement("option");
+        opt.value = idx;
+        opt.textContent = `${d.marca} - ${d.modelo} (${d.gama || "Estándar"})`;
+        sel.appendChild(opt);
+      });
+
+      if (!resetSeleccion && indicePrevio < listaFiltradaActual.length) {
+        sel.value = String(indicePrevio);
+      } else {
+        sel.value = "0";
+      }
+
+      renderConfig();
+    }
+
+    function renderConfig() {
+      if (listaFiltradaActual.length === 0) return;
+      const idx = Number(document.getElementById("modeloSelect").value || 0);
+      const base = listaFiltradaActual[idx] || listaFiltradaActual[0];
+      if (!base) return;
+
+      const armaKey = document.getElementById("armaSelect").value;
+      const off = offsetsArma[armaKey];
+
+      configActual = {
+        marca: base.marca,
+        modelo: base.modelo,
+        gama: base.gama || "Estándar",
+        general: clamp((base.general ?? 150) + off.g, 0, 200),
+        puntoRojo: clamp((base.puntoRojo ?? 150) + off.r, 0, 200),
+        mira2x: clamp((base.mira2x ?? 140) + off.m2, 0, 200),
+        mira4x: clamp((base.mira4x ?? 130) + off.m4, 0, 200),
+        francotirador: clamp((base.francotirador ?? 90) + off.f, 0, 200),
+        camara: clamp((base.camara ?? 150) + off.g, 0, 200),
+        botonDisparo: clamp((base.botonDisparo ?? 45) + off.b, 15, 95),
+        dpiSugerido: base.dpiSugerido ?? "Fábrica",
+        velocidadPuntero: base.velocidadPuntero ?? 7
+      };
+
+      document.getElementById("gamaInfo").textContent =
+        `Gama: ${configActual.gama} | Puntero: ${configActual.velocidadPuntero}`;
+
+      document.getElementById("resultadoGrid").innerHTML = `
+        <div class="stat"><span>GENERAL</span><strong>${configActual.general}</strong></div>
+        <div class="stat"><span>PUNTO ROJO</span><strong>${configActual.puntoRojo}</strong></div>
+        <div class="stat"><span>MIRA 2X</span><strong>${configActual.mira2x}</strong></div>
+        <div class="stat"><span>MIRA 4X</span><strong>${configActual.mira4x}</strong></div>
+        <div class="stat"><span>FRANCOTIRADOR</span><strong>${configActual.francotirador}</strong></div>
+        <div class="stat"><span>CÁMARA 360°</span><strong>${configActual.camara}</strong></div>
+        <div class="stat"><span>BOTÓN DISPARO</span><strong>${configActual.botonDisparo}%</strong></div>
+        <div class="stat"><span>DPI SUGERIDO</span><strong>${configActual.dpiSugerido}</strong></div>
+      `;
+    }
+
+    document.getElementById("buscarInput").addEventListener("input", () => {
+      document.getElementById("copiadoMsg").textContent = "";
+      aplicarBusqueda(true);
+    });
+
+    document.getElementById("btnLimpiar").addEventListener("click", () => {
+      document.getElementById("buscarInput").value = "";
+      document.getElementById("copiadoMsg").textContent = "";
+      aplicarBusqueda(true);
+      document.getElementById("buscarInput").focus();
+    });
+
+    document.getElementById("modeloSelect").addEventListener("change", renderConfig);
+    document.getElementById("armaSelect").addEventListener("change", renderConfig);
+
+    document.getElementById("btnCopiar").addEventListener("click", async () => {
+      if (!configActual) return;
+      const texto =
+`⚡ CHALOZKYSENSYSPRO WEB ⚡
+📱 ${configActual.marca} ${configActual.modelo}
+• General: ${configActual.general}
+• Punto Rojo: ${configActual.puntoRojo}
+• Mira 2x: ${configActual.mira2x}
+• Mira 4x: ${configActual.mira4x}
+• Francotirador: ${configActual.francotirador}
+• Cámara 360°: ${configActual.camara}
+• Botón Disparo: ${configActual.botonDisparo}%
+• DPI: ${configActual.dpiSugerido}`;
+      await navigator.clipboard.writeText(texto);
+      document.getElementById("copiadoMsg").textContent = "Configuración copiada al portapapeles.";
+    });
+
+    document.getElementById("btnSolicitarModelo").addEventListener("click", async () => {
+      const modeloBuscado = document.getElementById("buscarInput").value.trim();
+      if (!modeloBuscado) return;
+      const solicitud = `Solicitud de modelo para CHALOZKYSENSYSPRO: ${modeloBuscado}`;
+      await navigator.clipboard.writeText(solicitud);
+      document.getElementById("copiadoMsg").textContent =
+        `Solicitud copiada: "${modeloBuscado}". Pégalo aquí para sumarlo al JSON.`;
+    });
+  </script>
+</body>
