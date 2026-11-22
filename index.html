@@ -34,6 +34,25 @@
     h1 { color: var(--cyan); margin: 0 0 6px; font-size: 18px; }
     .sub { color: var(--green); font-size: 12px; margin-bottom: 12px; }
     .meta { color: var(--muted); font-size: 12px; margin-top: 6px; }
+    .search-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .search-row input {
+      margin-top: 0;
+      flex: 1;
+    }
+    .btn-mini {
+      width: auto;
+      margin-top: 0;
+      padding: 10px 14px;
+      background: var(--panel-alt);
+      color: var(--cyan);
+      border: 1px solid var(--border);
+      font-weight: bold;
+    }
     input, select, button {
       width: 100%;
       padding: 10px 12px;
@@ -67,6 +86,14 @@
     .stat strong { color: var(--green); font-size: 16px; }
     .hidden { display: none; }
     .err { color: var(--crimson); font-size: 12px; margin-top: 8px; }
+    .no-match {
+      background: var(--panel-alt);
+      border: 1px dashed var(--crimson);
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
@@ -83,21 +110,36 @@
     <h1>CHALOZKYSENSYSPRO // WEB</h1>
     <div id="estadoSync" class="sub">CONECTANDO A GITHUB RAW...</div>
 
-    <input id="buscarInput" type="text" placeholder="Buscar modelo (S24 Ultra, POCO, A55, Redmi...)" />
+    <label for="buscarInput">Buscador de modelo o marca:</label>
+    <div class="search-row">
+      <input id="buscarInput" type="text" placeholder="Ej: S24 Ultra, POCO X6, A55, Redmi, Moto..." autocomplete="off" />
+      <button id="btnLimpiar" type="button" class="btn-mini">LIMPIAR</button>
+    </div>
+    <div id="contadorResultados" class="meta"></div>
+
     <select id="modeloSelect"></select>
     <div id="gamaInfo" class="meta"></div>
 
-    <select id="armaSelect">
-      <option value="versatil">Versátil</option>
-      <option value="ar">SCAR / M4A1</option>
-      <option value="smg">MP5 / MP40 / UMP</option>
-      <option value="tirador">AC80 / SVD / Carapájaro</option>
-      <option value="escopeta">M1887 / M1014</option>
-      <option value="franco">AWM / M82B</option>
-    </select>
+    <div id="sinCoincidenciaBox" class="no-match hidden">
+      <div class="err" style="margin-top:0;">Modelo no encontrado en la base actual.</div>
+      <div id="textoModeloSolicitado" class="meta"></div>
+      <button id="btnSolicitarModelo" type="button" style="margin-top:8px;">COPIAR SOLICITUD DE MODELO</button>
+    </div>
 
-    <div id="resultadoGrid" class="grid"></div>
-    <button id="btnCopiar">COPIAR CONFIGURACIÓN</button>
+    <div id="panelConfig">
+      <select id="armaSelect">
+        <option value="versatil">Versátil</option>
+        <option value="ar">SCAR / M4A1</option>
+        <option value="smg">MP5 / MP40 / UMP</option>
+        <option value="tirador">AC80 / SVD / Carapájaro</option>
+        <option value="escopeta">M1887 / M1014</option>
+        <option value="franco">AWM / M82B</option>
+      </select>
+
+      <div id="resultadoGrid" class="grid"></div>
+      <button id="btnCopiar" type="button">COPIAR CONFIGURACIÓN</button>
+    </div>
+
     <div id="copiadoMsg" class="sub" style="margin-top: 8px;"></div>
   </div>
 
@@ -106,6 +148,7 @@
     const URL_JSON = "https://raw.githubusercontent.com/chalozkygb-glitch/ChalozkySensiPro/main/SENSIBILIDADES.JSON";
 
     let dispositivos = [];
+    let listaFiltradaActual = [];
     let configActual = null;
 
     const offsetsArma = {
@@ -118,6 +161,15 @@
     };
 
     const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+    function normalizar(texto) {
+      return (texto || "")
+        .toString()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    }
 
     document.getElementById("btnEntrar").addEventListener("click", async () => {
       const val = document.getElementById("claveInput").value.trim();
@@ -135,37 +187,73 @@
         const res = await fetch(URL_JSON, { cache: "no-store" });
         dispositivos = await res.json();
         document.getElementById("estadoSync").textContent = `ONLINE // ${dispositivos.length} MODELOS CARGADOS`;
-        renderSelect(dispositivos);
-        renderConfig();
+        aplicarBusqueda(true);
       } catch (e) {
         document.getElementById("estadoSync").textContent = "ERROR AL CARGAR JSON REMOTO";
       }
     }
 
     function filtrarLista() {
-      const q = document.getElementById("buscarInput").value.trim().toLowerCase();
-      if (!q) return dispositivos;
-      return dispositivos.filter(d =>
-        (d.modelo || "").toLowerCase().includes(q) ||
-        (d.marca || "").toLowerCase().includes(q)
-      );
-    }
+      const rawQuery = document.getElementById("buscarInput").value;
+      const terminos = normalizar(rawQuery).split(/\s+/).filter(Boolean);
+      if (terminos.length === 0) return dispositivos;
 
-    function renderSelect(lista) {
-      const sel = document.getElementById("modeloSelect");
-      sel.innerHTML = "";
-      lista.forEach((d, idx) => {
-        const opt = document.createElement("option");
-        opt.value = idx;
-        opt.textContent = `${d.marca} - ${d.modelo}`;
-        sel.appendChild(opt);
+      return dispositivos.filter(d => {
+        const combinado = normalizar(`${d.marca || ""} ${d.modelo || ""} ${d.gama || ""} ${d.id || ""}`);
+        return terminos.every(t => combinado.includes(t));
       });
     }
 
+    function aplicarBusqueda(resetSeleccion = true) {
+      listaFiltradaActual = filtrarLista();
+      const queryTexto = document.getElementById("buscarInput").value.trim();
+      const contador = document.getElementById("contadorResultados");
+      const sinMatchBox = document.getElementById("sinCoincidenciaBox");
+      const panelConfig = document.getElementById("panelConfig");
+      const sel = document.getElementById("modeloSelect");
+
+      if (listaFiltradaActual.length === 0) {
+        contador.textContent = "0 coincidencias encontradas";
+        sel.classList.add("hidden");
+        panelConfig.classList.add("hidden");
+        sinMatchBox.classList.remove("hidden");
+        document.getElementById("textoModeloSolicitado").textContent =
+          `Buscaste: "${queryTexto}". Copia este aviso para sumarlo al JSON.`;
+        document.getElementById("gamaInfo").textContent = "";
+        configActual = null;
+        return;
+      }
+
+      sinMatchBox.classList.add("hidden");
+      sel.classList.remove("hidden");
+      panelConfig.classList.remove("hidden");
+
+      contador.textContent = queryTexto
+        ? `${listaFiltradaActual.length} coincidencia(s) para "${queryTexto}"`
+        : `Mostrando todos los modelos (${listaFiltradaActual.length})`;
+
+      const indicePrevio = Number(sel.value || 0);
+      sel.innerHTML = "";
+      listaFiltradaActual.forEach((d, idx) => {
+        const opt = document.createElement("option");
+        opt.value = idx;
+        opt.textContent = `${d.marca} - ${d.modelo} (${d.gama || "Estándar"})`;
+        sel.appendChild(opt);
+      });
+
+      if (!resetSeleccion && indicePrevio < listaFiltradaActual.length) {
+        sel.value = String(indicePrevio);
+      } else {
+        sel.value = "0";
+      }
+
+      renderConfig();
+    }
+
     function renderConfig() {
-      const listaFiltrada = filtrarLista();
+      if (listaFiltradaActual.length === 0) return;
       const idx = Number(document.getElementById("modeloSelect").value || 0);
-      const base = listaFiltrada[idx] || listaFiltrada[0];
+      const base = listaFiltradaActual[idx] || listaFiltradaActual[0];
       if (!base) return;
 
       const armaKey = document.getElementById("armaSelect").value;
@@ -202,10 +290,17 @@
     }
 
     document.getElementById("buscarInput").addEventListener("input", () => {
-      const f = filtrarLista();
-      renderSelect(f);
-      renderConfig();
+      document.getElementById("copiadoMsg").textContent = "";
+      aplicarBusqueda(true);
     });
+
+    document.getElementById("btnLimpiar").addEventListener("click", () => {
+      document.getElementById("buscarInput").value = "";
+      document.getElementById("copiadoMsg").textContent = "";
+      aplicarBusqueda(true);
+      document.getElementById("buscarInput").focus();
+    });
+
     document.getElementById("modeloSelect").addEventListener("change", renderConfig);
     document.getElementById("armaSelect").addEventListener("change", renderConfig);
 
@@ -224,6 +319,15 @@
 • DPI: ${configActual.dpiSugerido}`;
       await navigator.clipboard.writeText(texto);
       document.getElementById("copiadoMsg").textContent = "Configuración copiada al portapapeles.";
+    });
+
+    document.getElementById("btnSolicitarModelo").addEventListener("click", async () => {
+      const modeloBuscado = document.getElementById("buscarInput").value.trim();
+      if (!modeloBuscado) return;
+      const solicitud = `Solicitud de modelo para CHALOZKYSENSYSPRO: ${modeloBuscado}`;
+      await navigator.clipboard.writeText(solicitud);
+      document.getElementById("copiadoMsg").textContent =
+        `Solicitud copiada: "${modeloBuscado}". Pégalo aquí para sumarlo a SENSIBILIDADES.JSON.`;
     });
   </script>
 </body>
