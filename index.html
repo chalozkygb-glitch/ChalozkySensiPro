@@ -1,1 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHALOZKYSENSYSPRO // VETERAN EDITION</title>
+  <style>
+    :root {
+      --bg: #05070C;
+      --panel: rgba(12, 18, 29, 0.92);
+      --panel-alt: #101827;
+      --cyan: #00F0FF;
+      --green: #00FF88;
+      --crimson: #FF2A55;
+      --gold: #FFB800;
+      --sakura: #FF5E9E;
+      --text: #E6F4F8;
+      --muted: #7D92A1;
+      --border: #1E2E42;
+    }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, monospace; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #111c33 0%, var(--bg) 65%);
+      color: var(--text);
+      padding: 14px;
+      min-height: 100vh;
+    }
+    .box {
+      max-width: 720px;
+      margin: 0 auto 14px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--cyan);
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 240, 255, 0.1);
+      backdrop-filter: blur(8px);
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+    h1 { color: var(--cyan); margin: 0; font-size: 17px; letter-spacing: 1px; text-transform: uppercase; }
+    .badge-vet {
+      background: linear-gradient(45deg, var(--crimson), var(--gold));
+      color: #000;
+      font-weight: 900;
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .sub { color: var(--green); font-size: 11px; font-family: monospace; margin-top: 4px; }
+    .meta { color: var(--muted); font-size: 12px; margin-top: 6px; }
+    .vet-gallery {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 14px 0;
+    }
+    .vet-card {
+      background: linear-gradient(180deg, #162238 0%, #0b111e 100%);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 4px;
+      text-align: center;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .vet-card:hover { transform: translateY(-2px); border-color: var(--gold); }
+    .vet-card svg { width: 42px; height: 42px; margin-bottom: 4px; filter: drop-shadow(0 0 6px rgba(255,184,0,0.4)); }
+    .vet-title { font-size: 10px; font-weight: bold; color: var(--gold); display: block; }
+    .vet-season { font-size: 9px; color: var(--muted); }
+    .search-row { display: flex; gap: 8px; margin-top: 8px; }
+    .search-row input { margin-top: 0; flex: 1; }
+    input, select, button {
+      width: 100%;
+      padding: 11px 12px;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--panel-alt);
+      color: var(--text);
+      font-size: 13px;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--cyan); }
+    button {
+      background: linear-gradient(90deg, var(--cyan), #00b8d4);
+      color: #000;
+      font-weight: 800;
+      cursor: pointer;
+      border: none;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(0, 240, 255, 0.25);
+    }
+    .btn-mini {
+      width: auto; margin-top: 0; padding: 0 14px;
+      background: var(--panel-alt); color: var(--cyan);
+      border: 1px solid var(--border); box-shadow: none;
+    }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 14px; }
+    .stat {
+      background: linear-gradient(135deg, #121B2B 0%, #0A0F1A 100%);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .stat span { display: block; color: var(--muted); font-size: 10px; letter-spacing: 0.5px; }
+    .stat strong { color: var(--green); font-size: 18px; font-family: monospace; }
+    .hidden { display: none; }
+    .err { color: var(--crimson); font-size: 12px; margin-top: 8px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div id="gateBox" class="box">
+    <div class="header-brand">
+      <div>
+        <h1>SENSI-SYS // CHALOZKY.GB</h1>
+        <div class="sub">SISTEMA TÁCTICO DE CONFIGURACIÓN</div>
+      </div>
+      <span class="badge-vet">OG VETERAN</span>
+    </div>
+
+    <div class="vet-gallery">
+      <div class="vet-card">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M16 24L32 10L48 24L44 48L32 56L20 48L16 24Z" fill="#FF5E9E" fill-opacity="0.2" stroke="#FF5E9E" stroke-width="2.5"/>
+          <path d="M22 28L28 32M42 28L36 32" stroke="#00F0FF" stroke-width="3" stroke-linecap="round"/>
+          <path d="M24 42L32 38L40 42L32 48L24 42Z" fill="#FF2A55"/>
+          <circle cx="32" cy="18" r="3" fill="#FFB800"/>
+        </svg>
+        <span class="vet-title">SAKURA</span>
+        <span class="vet-season">PASE S1</span>
+      </div>
+      <div class="vet-card">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M14 36C14 22 22 14 32 14C42 14 50 22 50 36H14Z" fill="#FFB800" fill-opacity="0.2" stroke="#FFB800" stroke-width="2.5"/>
+          <path d="M10 36H54L58 42H6L10 36Z" fill="#00F0FF"/>
+          <rect x="26" y="22" width="12" height="8" rx="2" stroke="#FF2A55" stroke-width="2"/>
+        </svg>
+        <span class="vet-title">HIP HOP</span>
+        <span class="vet-season">PASE S2</span>
+      </div>
+      <div class="vet-card">
+        <svg viewBox="0 0 64 64" fill="none">
+          <rect x="18" y="14" width="28" height="36" rx="12" fill="#00FF88" fill-opacity="0.15" stroke="#00FF88" stroke-width="2.5"/>
+          <circle cx="26" cy="28" r="3" fill="#FF2A55"/>
+          <circle cx="38" cy="28" r="3" fill="#FF2A55"/>
+          <path d="M24 40Q32 46 40 40" stroke="#00FF88" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span class="vet-title">CRIMINAL</span>
+        <span class="vet-season">INCUBADORA</span>
+      </div>
+      <div class="vet-card">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M30 34C20 20 8 22 10 36C12 44 22 46 30 42" stroke="#00F0FF" stroke-width="2.5" fill="#00F0FF" fill-opacity="0.2"/>
+          <path d="M34 34C44 20 56 22 54 36C52 44 42 46 34 42" stroke="#00F0FF" stroke-width="2.5" fill="#00F0FF" fill-opacity="0.2"/>
+          <path d="M32 24V48" stroke="#FFB800" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span class="vet-title">ANGELICAL</span>
+        <span class="vet-season">LEGENDARIO</span>
+      </div>
+    </div>
+
+    <label for="claveInput" class="meta">INGRESA TU CLAVE DE ACCESO:</label>
+    <input id="claveInput" type="password" placeholder="Código VIP..." autocomplete="off" />
+    <button id="btnEntrar" type="button">DESBLOQUEAR TERMINAL</button>
+    <div id="gateMsg" class="err"></div>
+  </div>
+    <div id="appBox" class="box hidden">
+    <div class="header-brand">
+      <div>
+        <h1>CHALOZKYSENSYSPRO</h1>
+        <div id="estadoSync" class="sub">SINCRONIZANDO BASE DE DATOS...</div>
+      </div>
+      <span class="badge-vet">EDICIÓN OG</span>
+    </div>
+
+    <div class="vet-gallery" style="grid-template-columns: repeat(3, 1fr); margin-top: 0;">
+      <div class="vet-card" style="border-color: #FF5E9E;">
+        <span class="vet-title" style="color:#FF5E9E;">🌸 SAKURA</span>
+        <span class="vet-season">PRECISIÓN +10%</span>
+      </div>
+      <div class="vet-card" style="border-color: #FFB800;">
+        <span class="vet-title">👑 HIP HOP</span>
+        <span class="vet-season">MOVIMIENTO PRO</span>
+      </div>
+      <div class="vet-card" style="border-color: #00F0FF;">
+        <span class="vet-title" style="color:#00F0FF;">🪽 ANGELICAL</span>
+        <span class="vet-season">TODO ROJO</span>
+      </div>
+    </div>
+
+    <label for="buscarInput" class="meta">BUSCAR DISPOSITIVO:</label>
+    <div class="search-row">
+      <input id="buscarInput" type="text" placeholder="Ej: S24 Ultra, POCO X6, A55, Redmi..." autocomplete="off" />
+      <button id="btnLimpiar" type="button" class="btn-mini">X</button>
+    </div>
+    <div id="contadorResultados" class="meta"></div>
+
+    <select id="modeloSelect"></select>
+    <div id="gamaInfo" class="meta" style="color: var(--gold);"></div>
+
+    <label for="armaSelect" class="meta" style="display:block; margin-top:10px;">ARMA PRINCIPAL:</label>
+    <select id="armaSelect">
+      <option value="versatil">⚡ Configuración Versátil (Todas las armas)</option>
+      <option value="ar">🔥 AR: SCAR / M4A1 / AK-47</option>
+      <option value="smg">💨 SMG: MP5 / MP40 / UMP</option>
+      <option value="tirador">🎯 Tirador: AC80 / SVD / Woodpecker</option>
+      <option value="escopeta">💥 Escopeta: M1887 / M1014</option>
+      <option value="franco">🔭 Francotirador: AWM / M82B</option>
+    </select>
+
+    <div id="resultadoGrid" class="grid"></div>
+    <button id="btnCopiar" type="button" style="margin-top: 14px;">📋 COPIAR SENSIBILIDAD VIP</button>
+    <div id="copiadoMsg" class="sub" style="margin-top: 8px; text-align: center;"></div>
+  </div>
+
+  <script>
+    const CLAVE_ACCESO = "CHALOZKY2026";
+    const URL_JSON = "https://raw.githubusercontent.com/chalozkygb-glitch/ChalozkySensiPro/main/SENSIBILIDADES.JSON";
+
+    let dispositivos = [];
+    let listaFiltrada = [];
+    let configActual = null;
+
+    const offsetsArma = {
+      versatil: { g: 0, r: 0, m2: 0, m4: 0, f: 0, b: 0 },
+      ar:       { g: 4, r: 5, m2: 2, m4: -2, f: 0, b: -1 },
+      smg:      { g: 10, r: 8, m2: 4, m4: 0, f: 0, b: -2 },
+      tirador:  { g: -5, r: -4, m2: -8, m4: -10, f: -4, b: 1 },
+      escopeta: { g: 8, r: 6, m2: 0, m4: 0, f: 0, b: -2 },
+      franco:   { g: -6, r: -4, m2: -4, m4: -6, f: -14, b: 2 }
+    };
+
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+    const norm = s => (s || "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+    document.getElementById("btnEntrar").addEventListener("click", async () => {
+      const val = document.getElementById("claveInput").value.trim();
+      if (val !== CLAVE_ACCESO) {
+        document.getElementById("gateMsg").textContent = "⚠️ Código incorrecto. Verifica e intenta de nuevo.";
+        return;
+      }
+      document.getElementById("gateBox").classList.add("hidden");
+      document.getElementById("appBox").classList.remove("hidden");
+      await cargarJson();
+    });
+
+    async function cargarJson() {
+      try {
+        const res = await fetch(URL_JSON, { cache: "no-store" });
+        dispositivos = await res.json();
+        document.getElementById("estadoSync").textContent = `ONLINE // ${dispositivos.length} MODELOS VERIFICADOS`;
+        filtrarYRenderizar();
+      } catch (e) {
+        document.getElementById("estadoSync").textContent = "⚠️ ERROR DE CONEXIÓN CON GITHUB";
+      }
+    }
+
+    function filtrarYRenderizar() {
+      const terminos = norm(document.getElementById("buscarInput").value).split(/\s+/).filter(Boolean);
+      listaFiltrada = !terminos.length ? dispositivos : dispositivos.filter(d => {
+        const txt = norm(`${d.marca || ""} ${d.modelo || ""} ${d.gama || ""}`);
+        return terminos.every(t => txt.includes(t));
+      });
+
+      const sel = document.getElementById("modeloSelect");
+      sel.innerHTML = "";
+      document.getElementById("contadorResultados").textContent = listaFiltrada.length
+        ? `${listaFiltrada.length} dispositivo(s) encontrado(s)`
+        : "No se encontró ese modelo en la base.";
+
+      listaFiltrada.forEach((d, i) => {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = `${d.marca} - ${d.modelo}`;
+        sel.appendChild(opt);
+      });
+
+      renderConfig();
+    }
+
+    function renderConfig() {
+      const base = listaFiltrada[Number(document.getElementById("modeloSelect").value || 0)];
+      if (!base) {
+        document.getElementById("resultadoGrid").innerHTML = "";
+        document.getElementById("gamaInfo").textContent = "";
+        configActual = null;
+        return;
+      }
+
+      const off = offsetsArma[document.getElementById("armaSelect").value];
+      configActual = {
+        marca: base.marca,
+        modelo: base.modelo,
+        gama: base.gama || "Estándar",
+        general: clamp((base.general ?? 150) + off.g, 0, 200),
+        puntoRojo: clamp((base.puntoRojo ?? 150) + off.r, 0, 200),
+        mira2x: clamp((base.mira2x ?? 140) + off.m2, 0, 200),
+        mira4x: clamp((base.mira4x ?? 130) + off.m4, 0, 200),
+        francotirador: clamp((base.francotirador ?? 90) + off.f, 0, 200),
+        camara: clamp((base.camara ?? 150) + off.g, 0, 200),
+        botonDisparo: clamp((base.botonDisparo ?? 45) + off.b, 15, 95),
+        dpiSugerido: base.dpiSugerido ?? "Fábrica",
+        velocidadPuntero: base.velocidadPuntero ?? 7
+      };
+
+      document.getElementById("gamaInfo").textContent = `🏆 Categoría: ${configActual.gama} | Puntero: ${configActual.velocidadPuntero}`;
+      document.getElementById("resultadoGrid").innerHTML = `
+        <div class="stat"><span>GENERAL</span><strong>${configActual.general}</strong></div>
+        <div class="stat"><span>PUNTO ROJO</span><strong>${configActual.puntoRojo}</strong></div>
+        <div class="stat"><span>MIRA 2X</span><strong>${configActual.mira2x}</strong></div>
+        <div class="stat"><span>MIRA 4X</span><strong>${configActual.mira4x}</strong></div>
+        <div class="stat"><span>FRANCOTIRADOR</span><strong>${configActual.francotirador}</strong></div>
+        <div class="stat"><span>CÁMARA 360°</span><strong>${configActual.camara}</strong></div>
+        <div class="stat" style="border-left-color: var(--crimson);"><span>BOTÓN DISPARO</span><strong style="color: var(--crimson);">${configActual.botonDisparo}%</strong></div>
+        <div class="stat" style="border-left-color: var(--cyan);"><span>DPI SUGERIDO</span><strong style="color: var(--cyan);">${configActual.dpiSugerido}</strong></div>
+      `;
+    }
+
+    document.getElementById("buscarInput").addEventListener("input", () => {
+      document.getElementById("copiadoMsg").textContent = "";
+      filtrarYRenderizar();
+    });
+    document.getElementById("btnLimpiar").addEventListener("click", () => {
+      document.getElementById("buscarInput").value = "";
+      document.getElementById("copiadoMsg").textContent = "";
+      filtrarYRenderizar();
+    });
+    document.getElementById("modeloSelect").addEventListener("change", renderConfig);
+    document.getElementById("armaSelect").addEventListener("change", renderConfig);
+
+    document.getElementById("btnCopiar").addEventListener("click", async () => {
+      if (!configActual) return;
+      const txt = `🔥 SENSI-SYS // CHALOZKY.GB (OG EDITION) 🔥\n📱 ${configActual.marca} ${configActual.modelo}\n• General: ${configActual.general}\n• Punto Rojo: ${configActual.puntoRojo}\n• Mira 2x: ${configActual.mira2x}\n• Mira 4x: ${configActual.mira4x}\n• Francotirador: ${configActual.francotirador}\n• Cámara 360°: ${configActual.camara}\n• Botón Disparo: ${configActual.botonDisparo}%\n• DPI: ${configActual.dpiSugerido}`;
+      await navigator.clipboard.writeText(txt);
+      document.getElementById("copiadoMsg").textContent = "✅ ¡SENSIBILIDAD COPIADA AL PORTAPAPELES!";
+    });
+  </script>
+</body>
+</html>
 
