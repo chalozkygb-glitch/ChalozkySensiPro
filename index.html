@@ -1,1 +1,230 @@
-ChalozkySensiPro/main/SENSIBILIDADES.JSON](https://raw.githubusercontent.com/chalozkygb-glitch/ChalozkySensiPro/main/SENSIBILIDADES.JSON
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHALOZKYSENSYSPRO // SENSI-SYS WEB</title>
+  <style>
+    :root {
+      --bg: #06090F;
+      --panel: #0C121D;
+      --panel-alt: #121B2B;
+      --cyan: #00F0FF;
+      --green: #00FF88;
+      --crimson: #FF2A55;
+      --text: #E6F4F8;
+      --muted: #7D92A1;
+      --border: #1B2B3E;
+    }
+    * { box-sizing: border-box; font-family: monospace; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+    }
+    .box {
+      max-width: 720px;
+      margin: 0 auto 14px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    h1 { color: var(--cyan); margin: 0 0 6px; font-size: 18px; }
+    .sub { color: var(--green); font-size: 12px; margin-bottom: 12px; }
+    .meta { color: var(--muted); font-size: 12px; margin-top: 6px; }
+    input, select, button {
+      width: 100%;
+      padding: 10px 12px;
+      margin-top: 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--panel-alt);
+      color: var(--text);
+      font-size: 13px;
+    }
+    button {
+      background: var(--cyan);
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .stat {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+    }
+    .stat span { display: block; color: var(--muted); font-size: 11px; }
+    .stat strong { color: var(--green); font-size: 16px; }
+    .hidden { display: none; }
+    .err { color: var(--crimson); font-size: 12px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div id="gateBox" class="box">
+    <h1>SENSI-SYS // CHALOZKY.GB</h1>
+    <div class="sub">TERMINAL DE SENSIBILIDAD WEB</div>
+    <label>Código de acceso:</label>
+    <input id="claveInput" type="password" placeholder="Ingresa el código..." />
+    <button id="btnEntrar">VALIDAR ACCESO</button>
+    <div id="gateMsg" class="err"></div>
+  </div>
+
+  <div id="appBox" class="box hidden">
+    <h1>CHALOZKYSENSYSPRO // WEB</h1>
+    <div id="estadoSync" class="sub">CONECTANDO A GITHUB RAW...</div>
+
+    <input id="buscarInput" type="text" placeholder="Buscar modelo (S24 Ultra, POCO, A55, Redmi...)" />
+    <select id="modeloSelect"></select>
+    <div id="gamaInfo" class="meta"></div>
+
+    <select id="armaSelect">
+      <option value="versatil">Versátil</option>
+      <option value="ar">SCAR / M4A1</option>
+      <option value="smg">MP5 / MP40 / UMP</option>
+      <option value="tirador">AC80 / SVD / Carapájaro</option>
+      <option value="escopeta">M1887 / M1014</option>
+      <option value="franco">AWM / M82B</option>
+    </select>
+
+    <div id="resultadoGrid" class="grid"></div>
+    <button id="btnCopiar">COPIAR CONFIGURACIÓN</button>
+    <div id="copiadoMsg" class="sub" style="margin-top: 8px;"></div>
+  </div>
+
+  <script>
+    const CLAVE_ACCESO = "CHALOZKY2026";
+    const URL_JSON = "https://raw.githubusercontent.com/chalozkygb-glitch/ChalozkySensiPro/main/SENSIBILIDADES.JSON";
+
+    let dispositivos = [];
+    let configActual = null;
+
+    const offsetsArma = {
+      versatil: { g: 0, r: 0, m2: 0, m4: 0, f: 0, b: 0 },
+      ar:       { g: 4, r: 5, m2: 2, m4: -2, f: 0, b: -1 },
+      smg:      { g: 10, r: 8, m2: 4, m4: 0, f: 0, b: -2 },
+      tirador:  { g: -5, r: -4, m2: -8, m4: -10, f: -4, b: 1 },
+      escopeta: { g: 8, r: 6, m2: 0, m4: 0, f: 0, b: -2 },
+      franco:   { g: -6, r: -4, m2: -4, m4: -6, f: -14, b: 2 }
+    };
+
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+    document.getElementById("btnEntrar").addEventListener("click", async () => {
+      const val = document.getElementById("claveInput").value.trim();
+      if (val !== CLAVE_ACCESO) {
+        document.getElementById("gateMsg").textContent = "Código incorrecto.";
+        return;
+      }
+      document.getElementById("gateBox").classList.add("hidden");
+      document.getElementById("appBox").classList.remove("hidden");
+      await cargarJson();
+    });
+
+    async function cargarJson() {
+      try {
+        const res = await fetch(URL_JSON, { cache: "no-store" });
+        dispositivos = await res.json();
+        document.getElementById("estadoSync").textContent = `ONLINE // ${dispositivos.length} MODELOS CARGADOS`;
+        renderSelect(dispositivos);
+        renderConfig();
+      } catch (e) {
+        document.getElementById("estadoSync").textContent = "ERROR AL CARGAR JSON REMOTO";
+      }
+    }
+
+    function filtrarLista() {
+      const q = document.getElementById("buscarInput").value.trim().toLowerCase();
+      if (!q) return dispositivos;
+      return dispositivos.filter(d =>
+        (d.modelo || "").toLowerCase().includes(q) ||
+        (d.marca || "").toLowerCase().includes(q)
+      );
+    }
+
+    function renderSelect(lista) {
+      const sel = document.getElementById("modeloSelect");
+      sel.innerHTML = "";
+      lista.forEach((d, idx) => {
+        const opt = document.createElement("option");
+        opt.value = idx;
+        opt.textContent = `${d.marca} - ${d.modelo}`;
+        sel.appendChild(opt);
+      });
+    }
+
+    function renderConfig() {
+      const listaFiltrada = filtrarLista();
+      const idx = Number(document.getElementById("modeloSelect").value || 0);
+      const base = listaFiltrada[idx] || listaFiltrada[0];
+      if (!base) return;
+
+      const armaKey = document.getElementById("armaSelect").value;
+      const off = offsetsArma[armaKey];
+
+      configActual = {
+        marca: base.marca,
+        modelo: base.modelo,
+        gama: base.gama || "Estándar",
+        general: clamp((base.general ?? 150) + off.g, 0, 200),
+        puntoRojo: clamp((base.puntoRojo ?? 150) + off.r, 0, 200),
+        mira2x: clamp((base.mira2x ?? 140) + off.m2, 0, 200),
+        mira4x: clamp((base.mira4x ?? 130) + off.m4, 0, 200),
+        francotirador: clamp((base.francotirador ?? 90) + off.f, 0, 200),
+        camara: clamp((base.camara ?? 150) + off.g, 0, 200),
+        botonDisparo: clamp((base.botonDisparo ?? 45) + off.b, 15, 95),
+        dpiSugerido: base.dpiSugerido ?? "Fábrica",
+        velocidadPuntero: base.velocidadPuntero ?? 7
+      };
+
+      document.getElementById("gamaInfo").textContent =
+        `Gama: ${configActual.gama} | Puntero: ${configActual.velocidadPuntero}`;
+
+      document.getElementById("resultadoGrid").innerHTML = `
+        <div class="stat"><span>GENERAL</span><strong>${configActual.general}</strong></div>
+        <div class="stat"><span>PUNTO ROJO</span><strong>${configActual.puntoRojo}</strong></div>
+        <div class="stat"><span>MIRA 2X</span><strong>${configActual.mira2x}</strong></div>
+        <div class="stat"><span>MIRA 4X</span><strong>${configActual.mira4x}</strong></div>
+        <div class="stat"><span>FRANCOTIRADOR</span><strong>${configActual.francotirador}</strong></div>
+        <div class="stat"><span>CÁMARA 360°</span><strong>${configActual.camara}</strong></div>
+        <div class="stat"><span>BOTÓN DISPARO</span><strong>${configActual.botonDisparo}%</strong></div>
+        <div class="stat"><span>DPI SUGERIDO</span><strong>${configActual.dpiSugerido}</strong></div>
+      `;
+    }
+
+    document.getElementById("buscarInput").addEventListener("input", () => {
+      const f = filtrarLista();
+      renderSelect(f);
+      renderConfig();
+    });
+    document.getElementById("modeloSelect").addEventListener("change", renderConfig);
+    document.getElementById("armaSelect").addEventListener("change", renderConfig);
+
+    document.getElementById("btnCopiar").addEventListener("click", async () => {
+      if (!configActual) return;
+      const texto =
+`⚡ CHALOZKYSENSYSPRO WEB ⚡
+📱 ${configActual.marca} ${configActual.modelo}
+• General: ${configActual.general}
+• Punto Rojo: ${configActual.puntoRojo}
+• Mira 2x: ${configActual.mira2x}
+• Mira 4x: ${configActual.mira4x}
+• Francotirador: ${configActual.francotirador}
+• Cámara 360°: ${configActual.camara}
+• Botón Disparo: ${configActual.botonDisparo}%
+• DPI: ${configActual.dpiSugerido}`;
+      await navigator.clipboard.writeText(texto);
+      document.getElementById("copiadoMsg").textContent = "Configuración copiada al portapapeles.";
+    });
+  </script>
+</body>
+</html>
