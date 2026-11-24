@@ -2733,6 +2733,27 @@
 
         // RENDERIZADO INICIAL INMEDIATO
         renderEliteCard();
+const CLAVE_ACCESO = "CHALOZKY2026";
+const gateEl = document.getElementById("gateBox") || document.getElementById("loginBox");
+const appEl = document.getElementById("appBox") || document.getElementById("mainApp");
+const passInput = document.getElementById("claveInput") || document.getElementById("passInput");
+const btnLogin = document.getElementById("btnEntrar") || document.getElementById("loginBtn");
+const msgLogin = document.getElementById("gateMsg") || document.getElementById("loginMsg");
+
+if (gateEl && appEl && passInput && btnLogin) {
+  appEl.style.display = "none";
+  gateEl.style.display = "block";
+  btnLogin.addEventListener("click", () => {
+    if (passInput.value.trim() === CLAVE_ACCESO) {
+      if (msgLogin) msgLogin.textContent = "";
+      gateEl.style.display = "none";
+      appEl.style.display = "block";
+      if (typeof renderEliteCard === "function") renderEliteCard();
+    } else if (msgLogin) {
+      msgLogin.textContent = "Código incorrecto.";
+    }
+  });
+}
 
       } catch (err) {
         console.error('SENSI-SYS Error:', err);
