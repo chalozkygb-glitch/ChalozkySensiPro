@@ -1187,29 +1187,6 @@
     <button id="btnEntrar" type="button" style="width:100%;padding:11px;border-radius:8px;border:none;background:#00F0FF;color:#000;font-weight:800;cursor:pointer;">ENTRAR</button>
     <div id="gateMsg" style="color:#FF2A55;font-size:12px;margin-top:8px;"></div>
   </div>
-
-  const _claveVip = "CHALO240210";
-  const _gateEl = document.getElementById("gateBox");
-  const _mainCont = document.querySelector(".container");
-  const _passEl = document.getElementById("claveInput");
-  const _btnEl = document.getElementById("btnEntrar");
-  const _msgEl = document.getElementById("gateMsg");
-
-  if (_gateEl && _mainCont && _passEl && _btnEl) {
-    _mainCont.style.display = "none";
-    _gateEl.style.display = "block";
-
-    _btnEl.addEventListener("click", () => {
-      if (_passEl.value.trim() === _claveVip) {
-        if (_msgEl) _msgEl.textContent = "";
-        _gateEl.style.display = "none";
-        _mainCont.style.display = "block";
-        if (typeof renderEliteCard === "function") renderEliteCard();
-      } else if (_msgEl) {
-        _msgEl.textContent = "Código incorrecto.";
-      }
-    });
-  }
   
   <!-- CONTENEDOR PRINCIPAL -->
   <div class="container">
@@ -2769,5 +2746,30 @@
     });
       
   </script>
+  <script>
+  const _claveVip = "CHALO240210";
+  const _gateEl = document.getElementById("gateBox");
+  const _mainCont = document.querySelector(".container");
+  const _passEl = document.getElementById("claveInput");
+  const _btnEl = document.getElementById("btnEntrar");
+  const _msgEl = document.getElementById("gateMsg");
+
+  if (_gateEl && _mainCont && _passEl && _btnEl) {
+    _mainCont.style.display = "none";
+    _gateEl.style.display = "block";
+
+    _btnEl.addEventListener("click", () => {
+      if (_passEl.value.trim() === _claveVip) {
+        if (_msgEl) _msgEl.textContent = "";
+        _gateEl.style.display = "none";
+        _mainCont.style.display = "block";
+        if (typeof renderEliteCard === "function") renderEliteCard();
+      } else if (_msgEl) {
+        _msgEl.textContent = "Código incorrecto.";
+      }
+    });
+  }
+  </script>
+  
 </body>
 </html>
