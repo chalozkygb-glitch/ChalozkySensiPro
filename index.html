@@ -2739,32 +2739,32 @@
 
         // RENDERIZADO INICIAL INMEDIATO
         renderEliteCard();
-const CLAVE_ACCESO = "chalo2402";
-const gateEl = document.getElementById("gateBox") || document.getElementById("loginBox");
-const appEl = document.getElementById("appBox") || document.getElementById("mainApp");
-const passInput = document.getElementById("claveInput") || document.getElementById("passInput");
-const btnLogin = document.getElementById("btnEntrar") || document.getElementById("loginBtn");
-const msgLogin = document.getElementById("gateMsg") || document.getElementById("loginMsg");
-
-if (gateEl && appEl && passInput && btnLogin) {
-  appEl.style.display = "none";
-  gateEl.style.display = "block";
-  btnLogin.addEventListener("click", () => {
-    if (passInput.value.trim() === CLAVE_ACCESO) {
-      if (msgLogin) msgLogin.textContent = "";
-      gateEl.style.display = "none";
-      appEl.style.display = "block";
-      if (typeof renderEliteCard === "function") renderEliteCard();
-    } else if (msgLogin) {
-      msgLogin.textContent = "Código incorrecto.";
-    }
-  });
-}
-
       } catch (err) {
         console.error('SENSI-SYS Error:', err);
       }
     });
+      const _claveVip = "CHALOZKY2026";
+  const _gateEl = document.getElementById("gateBox");
+  const _mainCont = document.querySelector(".container");
+  const _passEl = document.getElementById("claveInput");
+  const _btnEl = document.getElementById("btnEntrar");
+  const _msgEl = document.getElementById("gateMsg");
+
+  if (_gateEl && _mainCont && _passEl && _btnEl) {
+    _mainCont.style.display = "none";
+    _gateEl.style.display = "block";
+
+    _btnEl.addEventListener("click", () => {
+      if (_passEl.value.trim() === _claveVip) {
+        if (_msgEl) _msgEl.textContent = "";
+        _gateEl.style.display = "none";
+        _mainCont.style.display = "block";
+        if (typeof renderEliteCard === "function") renderEliteCard();
+      } else if (_msgEl) {
+        _msgEl.textContent = "Código incorrecto.";
+      }
+    });
+  }
   </script>
 </body>
 </html>
