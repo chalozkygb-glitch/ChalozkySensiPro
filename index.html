@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="tactico">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SENSI-SYS // CHALOZKY.GB — Terminal Táctica FF</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme="tactico"] {
+      --bg-base: #06080d;
+      --bg-panel: rgba(12, 16, 26, 0.84);
+      --bg-card: rgba(18, 25, 38, 0.86);
+      --bg-elevated: rgba(24, 34, 52, 0.92);
+      --bg-input: rgba(8, 12, 20, 0.9);
+      --border-main: rgba(0, 240, 255, 0.22);
+      --border-subtle: rgba(255, 255, 255, 0.10);
+      --text-primary: #f4f8ff;
+      --text-secondary: #92a6c4;
+      --accent-primary: #00f0ff;
+      --accent-secondary: #ff2a55;
+      --accent-green: #00ff88;
+      --accent-contrast: #05070a;
+      --shadow-card: 0 14px 36px rgba(0, 0, 0, 0.55);
+    }
+
+    [data-theme="elite"] {
+      --bg-base: #eaf2fb;
+      --bg-panel: rgba(255, 255, 255, 0.92);
+      --bg-card: rgba(244, 248, 254, 0.94);
+      --bg-elevated: rgba(232, 241, 252, 0.98);
+      --bg-input: #ffffff;
+      --border-main: rgba(29, 78, 216, 0.22);
+      --border-subtle: rgba(15, 23, 42, 0.10);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --accent-primary: #1d4ed8;
+      --accent-secondary: #0284c7;
+      --accent-green: #16a34a;
+      --accent-contrast: #ffffff;
+      --shadow-card: 0 10px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0;
+  padding: 0;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 18px);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+    .font-mono-hud { font-family: 'JetBrains Mono', monospace; }
+
+    #fireCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glass-panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-main);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-card);
+    }
+
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .hud-input {
+      background: var(--bg-input);
+      border: 1px solid var(--border-main);
+      color: var(--text-primary);
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .hud-scroll::-webkit-scrollbar { width: 5px; }
+    .hud-scroll::-webkit-scrollbar-track { background: transparent; }
+    .hud-scroll::-webkit-scrollbar-thumb {
+      background: rgba(125, 150, 190, 0.35);
+      border-radius: 999px;
+    }
+
+    input[type="range"].sensi-range {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.25);
+      outline: none;
+    }
+    input[type="range"].sensi-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      border: 2.5px solid var(--bg-base);
+      box-shadow: 0 0 10px var(--accent-primary);
+      cursor: pointer;
+    }
+
+    @keyframes spinRing { to { transform: rotate(360deg); } }
+    .ring-spinner { animation: spinRing 0.9s linear infinite; }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .anim-enter { animation: fadeSlide 0.2s ease-out forwards; }
+  </style>
+</head>
+<body>
+
+  <!-- CANVAS DE LLAMAS ANIMADAS A 60 FPS -->
+  <canvas id="fireCanvas"></canvas>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <div class="relative z-10 max-w-[540px] mx-auto min-h-screen pb-12 flex flex-col">
+
+    <!-- BARRA SUPERIOR FIJA -->
+    <header class="sticky top-0 z-30 glass-panel border-x-0 border-t-0 px-3 py-2.5 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2 min-w-0">
+        <button id="menuOpenBtn" type="button" aria-label="Menú"
+          class="w-9 h-9 rounded-xl glass-card flex items-center justify-center font-black text-base cursor-pointer shrink-0"
+          style="color: var(--accent-primary); border-color: var(--border-main);">
+          ☰
+        </button>
+        <div class="min-w-0">
+          <div class="text-xs sm:text-sm font-black tracking-wider truncate">
+            SENSI-SYS // <span style="color: var(--accent-primary);">CHALOZKY.GB</span>
+          </div>
+          <div id="dbCounterSub" class="font-mono-hud text-[10px] font-bold tracking-widest uppercase truncate"
+            style="color: var(--accent-green);">
+            430+ MODELOS · 24 MARCAS · IA ONLINE
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5 shrink-0">
+        <!-- BOTÓN LLAMAS -->
+        <button id="fireModeBtn" type="button" title="Cambiar estilo de llamas animadas"
+          class="h-8 px-2.5 rounded-xl glass-card font-mono-hud text-[10px] font-extrabold tracking-wider flex items-center gap-1 cursor-pointer"
+          style="border-color: var(--border-main);">
+          🔥 <span id="fireModeLabel">CARMESÍ</span>
+        </button>
+        <!-- BOTÓN TEMA (TÁCTICO / ÉLITE) -->
+        <button id="themeToggleBtn" type="button" title="Alternar entre Interfaz Táctica y Élite"
+          class="h-8 px-2.5 rounded-xl glass-card font-mono-hud text-[10px] font-extrabold tracking-wider flex items-center gap-1 cursor-pointer"
+          style="border-color: var(--border-main); color: var(--accent-primary);">
+          ◐ <span id="themeLabel">TÁCTICO</span>
+        </button>
+        <!-- BOTÓN MP3 -->
+        <button id="audioToggleBtn" type="button" title="Reproductor MP3"
+          class="h-8 px-2.5 rounded-xl glass-card font-mono-hud text-[10px] font-extrabold tracking-wider flex items-center gap-1 cursor-pointer"
+          style="border-color: var(--border-main);">
+          ♪ MP3
+        </button>
+      </div>
+    </header>
+
+    <!-- BARRA DE APARTADOS SIEMPRE VISIBLE (ARRIBA EN AMBAS INTERFACES) -->
+    <nav class="sticky top-[57px] z-20 px-3 pt-2 pb-1">
+      <div class="glass-panel rounded-2xl p-1.5 grid grid-cols-4 gap-1">
+        <button type="button" data-tab="generator"
+          class="top-tab py-2 px-1.5 rounded-xl font-mono-hud text-[10px] sm:text-[11px] font-extrabold tracking-wide text-center transition-all cursor-pointer">
+          ⚡ GENERADOR
+        </button>
+        <button type="button" data-tab="combos"
+          class="top-tab py-2 px-1.5 rounded-xl font-mono-hud text-[10px] sm:text-[11px] font-extrabold tracking-wide text-center transition-all cursor-pointer">
+          🛡️ COMBOS
+        </button>
+        <button type="button" data-tab="best"
+          class="top-tab py-2 px-1.5 rounded-xl font-mono-hud text-[10px] sm:text-[11px] font-extrabold tracking-wide text-center transition-all cursor-pointer">
+          ⭐ MEJORES
+        </button>
+        <button type="button" data-tab="saved"
+          class="top-tab py-2 px-1.5 rounded-xl font-mono-hud text-[10px] sm:text-[11px] font-extrabold tracking-wide text-center transition-all cursor-pointer">
+          💾 MIS SENSIS
+        </button>
+      </div>
+    </nav>
+
+    <!-- REPRODUCTOR MP3 REAL DESPLEGABLE -->
+    <section id="audioDrawer" class="hidden mx-3 mt-2 p-3.5 rounded-2xl glass-panel flex-col gap-2.5">
+      <div class="flex items-center justify-between gap-2">
+        <span class="font-mono-hud text-[10px] font-extrabold tracking-wider uppercase" style="color: var(--accent-primary);">
+          REPRODUCTOR MP3 REAL (URL / LOCAL)
+        </span>
+        <span id="audioTrackLabel" class="font-mono-hud text-[10px] truncate max-w-[140px]" style="color: var(--text-secondary);">
+          SIN PISTA
+        </span>
+      </div>
+      <div class="flex flex-wrap items-center gap-1.5">
+        <input type="text" id="mp3UrlInput" placeholder="Pega URL directa .mp3..."
+          class="hud-input flex-1 min-w-[160px] h-9 px-3 rounded-xl font-mono-hud text-[11px] focus:outline-none" />
+        <button id="saveMp3UrlBtn" type="button"
+          class="h-9 px-3 rounded-xl font-mono-hud text-[10px] font-extrabold cursor-pointer"
+          style="background: var(--accent-green); color: #05070a;">
+          CARGAR
+        </button>
+        <label class="h-9 px-3 rounded-xl glass-card font-mono-hud text-[10px] font-extrabold flex items-center cursor-pointer"
+          style="color: var(--accent-primary);">
+          ARCHIVO
+          <input type="file" id="mp3FileInput" accept="audio/*" class="hidden" />
+        </label>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="playPauseAudioBtn" type="button"
+          class="h-8 px-3 rounded-xl glass-card font-mono-hud text-[10px] font-extrabold cursor-pointer shrink-0">
+          ▶ PLAY
+        </button>
+        <span class="font-mono-hud text-[10px]" style="color: var(--text-secondary);">VOL</span>
+        <input type="range" id="audioVolumeSlider" class="sensi-range flex-1" min="0" max="1" step="0.02" value="0.6" />
+        <button id="clearAudioBtn" type="button"
+          class="h-8 px-2.5 rounded-xl font-mono-hud text-[10px] font-extrabold cursor-pointer shrink-0"
+          style="background: rgba(255,42,85,0.16); color: #ff2a55; border: 1px solid rgba(255,42,85,0.4);">
+          LIMPIAR
+        </button>
+      </div>
+      <audio id="realAudioPlayer" loop preload="none"></audio>
+    </section>
+
+    <!-- MENÚ LATERAL DESLIZABLE (COMO EN EL VIDEO DE REFERENCIA) -->
+    <div id="drawerBackdrop" class="hidden fixed inset-0 bg-black/70 backdrop-blur-xs z-40"></div>
+    <aside id="sidebar"
+      class="fixed top-0 left-0 bottom-0 w-[82vw] max-w-[300px] glass-panel border-y-0 border-l-0 z-50 -translate-x-full transition-transform duration-200 ease-out flex flex-col p-4 gap-2.5">
+      <div class="flex items-center justify-between pb-3" style="border-bottom: 1px solid var(--border-subtle);">
+        <div>
+          <div class="text-base font-black tracking-wider" style="color: var(--accent-primary);">SENSI-SYS</div>
+          <div class="font-mono-hud text-[10px] font-bold tracking-widest" style="color: var(--accent-green);">CHALOZKY.GB // FF</div>
+        </div>
+        <button id="menuCloseBtn" type="button"
+          class="w-9 h-9 rounded-xl glass-card flex items-center justify-center font-bold cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <!-- Tarjeta Estado Operador -->
+      <div class="p-3 rounded-2xl" style="background: linear-gradient(135deg, rgba(255,42,85,0.22), rgba(0,240,255,0.14)); border: 1px solid var(--border-main);">
+        <div class="font-mono-hud text-[9px] font-bold uppercase" style="color: var(--text-secondary);">TU SUSCRIPCIÓN</div>
+        <div class="text-base font-black tracking-wider mt-0.5" style="color: var(--accent-green);">LEYENDA · CHALOZKY.GB</div>
+        <div class="font-mono-hud text-[10px] mt-0.5" style="color: var(--text-secondary);">Acceso completo + IA Online</div>
+      </div>
+
+      <button type="button" data-tab="generator"
+        class="side-nav w-full p-3.5 rounded-xl glass-card text-xs font-extrabold flex items-center justify-between cursor-pointer">
+        <span>⚡ Generador</span>
+        <span class="font-mono-hud text-[10px] px-2 py-0.5 rounded-full" style="background: rgba(0,255,136,0.15); color: var(--accent-green);">5 PASOS</span>
+      </button>
+
+      <button type="button" data-tab="combos"
+        class="side-nav w-full p-3.5 rounded-xl glass-card text-xs font-extrabold flex items-center justify-between cursor-pointer">
+        <span>🛡️ Combos de Habilidades</span>
+        <span class="font-mono-hud text-[10px] px-2 py-0.5 rounded-full" style="background: rgba(0,240,255,0.15); color: var(--accent-primary);">BR / DE</span>
+      </button>
+
+      <button type="button" data-tab="best"
+        class="side-nav w-full p-3.5 rounded-xl glass-card text-xs font-extrabold flex items-center justify-between cursor-pointer">
+        <span>⭐ Mejores Sensis</span>
+        <span class="font-mono-hud text-[10px] px-2 py-0.5 rounded-full" style="background: rgba(255,42,85,0.18); color: #ff2a55;">TOP</span>
+      </button>
+
+      <button type="button" data-tab="saved"
+        class="side-nav w-full p-3.5 rounded-xl glass-card text-xs font-extrabold flex items-center justify-between cursor-pointer">
+        <span>💾 Mis Sensis Guardadas</span>
+        <span id="savedSideBadge" class="font-mono-hud text-[10px] px-2 py-0.5 rounded-full" style="background: rgba(0,240,255,0.15); color: var(--accent-primary);">0</span>
+      </button>
+
+      <div class="mt-auto pt-3 font-mono-hud text-[10px] leading-relaxed" style="border-top: 1px solid var(--border-subtle); color: var(--text-secondary);">
+        CATÁLOGO LOCAL: <span id="sidebarTotalCount" class="font-bold" style="color: var(--accent-green);">432 MODELOS</span><br/>
+        BÚSQUEDA IA: CONECTADA
+      </div>
+    </aside>
+
+    <!-- CONTENIDO DE APARTADOS -->
+    <main class="px-3 pt-2.5 flex-1 flex flex-col gap-3">
+
+      <!-- =============================================================== -->
+      <!-- APARTADO 1: GENERADOR DE SENSIBILIDAD                           -->
+      <!-- =============================================================== -->
+      <section id="panel-generator" class="flex flex-col gap-3">
+
+        <!-- INDICADOR DE PASOS (01 EQUIPO -> 02 CURVA -> 03 DPI -> 04 BOTÓN -> 05 RESULTADO) -->
+        <div class="grid grid-cols-5 gap-1">
+          <button type="button" id="stepChip-1" class="step-pill p-1.5 rounded-xl glass-card text-center cursor-pointer">
+            <span class="block font-mono-hud text-[9px] font-extrabold">01</span>
+            <span class="block text-[10px] font-bold">Equipo</span>
+          </button>
+          <button type="button" id="stepChip-2" class="step-pill p-1.5 rounded-xl glass-card text-center cursor-pointer">
+            <span class="block font-mono-hud text-[9px] font-extrabold">02</span>
+            <span class="block text-[10px] font-bold">Curva</span>
+          </button>
+          <button type="button" id="stepChip-3" class="step-pill p-1.5 rounded-xl glass-card text-center cursor-pointer">
+            <span class="block font-mono-hud text-[9px] font-extrabold">03</span>
+            <span class="block text-[10px] font-bold">DPI</span>
+          </button>
+          <button type="button" id="stepChip-4" class="step-pill p-1.5 rounded-xl glass-card text-center cursor-pointer">
+            <span class="block font-mono-hud text-[9px] font-extrabold">04</span>
+            <span class="block text-[10px] font-bold">Botón</span>
+          </button>
+          <button type="button" id="stepChip-5" class="step-pill p-1.5 rounded-xl glass-card text-center cursor-pointer">
+            <span class="block font-mono-hud text-[9px] font-extrabold">05</span>
+            <span class="block text-[10px] font-bold">Sensi</span>
+          </button>
+        </div>
+
+        <!-- PASO 1: SELECCIONA LA MARCA Y EL MODELO (+ CONEXIÓN A INTERNET SI NO ESTÁ) -->
+        <div id="genStep-1" class="anim-enter rounded-2xl glass-panel p-4">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-mono-hud text-[10px] font-extrabold tracking-widest uppercase" style="color: var(--accent-primary);">
+              PASO 01 · SELECCIONA MARCA Y MODELO
+            </span>
+            <span id="filteredCountBadge" class="font-mono-hud text-[10px] font-extrabold px-2.5 py-0.5 rounded-full"
+              style="background: rgba(0,255,136,0.14); color: var(--accent-green);">
+              432 MODELOS
+            </span>
+          </div>
+          <h1 class="text-lg sm:text-xl font-black mt-1">¿Qué teléfono usas?</h1>
+
+          <!-- Buscador instantáneo -->
+          <div class="relative mt-2.5 mb-2.5">
+            <input type="text" id="deviceSearchInput" autocomplete="off"
+              placeholder="Escribe marca o modelo (ej. Galaxy S24 Ultra, Honor X5c, Redmi 14C...)"
+              class="hud-input w-full h-11 pl-3.5 pr-9 rounded-xl text-xs sm:text-sm focus:outline-none" />
+            <button type="button" id="clearSearchBtn"
+              class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 font-black text-sm px-1.5 cursor-pointer"
+              style="color: #ff2a55;">
+              ✕
+            </button>
+          </div>
+
+          <!-- Píldoras de marcas -->
+          <div id="brandPillsRow" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-2 mb-2"></div>
+
+          <!-- Lista clicable de modelos -->
+          <div id="deviceListBox" class="hud-scroll flex flex-col gap-2 max-h-[360px] overflow-y-auto pr-1"></div>
+
+          <!-- Tarjeta de conexión a Internet + IA cuando el modelo no aparece o se busca uno nuevo -->
+          <div id="internetAiCard" class="mt-3 p-3.5 rounded-2xl"
+            style="background: linear-gradient(135deg, rgba(0,240,255,0.12), rgba(0,255,136,0.10)); border: 1px dashed var(--accent-primary);">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-mono-hud text-[10px] font-extrabold uppercase" style="color: var(--accent-primary);">
+                🌐 BÚSQUEDA EN INTERNET + IA TÁCTICA
+              </span>
+              <span class="font-mono-hud text-[9px] font-bold px-2 py-0.5 rounded-full"
+                style="background: rgba(0,255,136,0.18); color: var(--accent-green);">
+                ONLINE
+              </span>
+            </div>
+            <p id="internetAiDesc" class="text-xs mt-1 leading-relaxed" style="color: var(--text-secondary);">
+              ¿Tu móvil no está en la lista? Escribe el nombre arriba y conéctate a Internet para detectar su tasa de refresco, densidad táctil y generar su sensibilidad calibrada.
+            </p>
+            <button type="button" id="searchInternetAiBtn"
+              class="mt-2.5 w-full h-10 rounded-xl font-mono-hud text-[11px] font-extrabold tracking-wider uppercase flex items-center justify-center gap-2 cursor-pointer transition-all"
+              style="background: var(--accent-primary); color: var(--accent-contrast);">
+              🌐 BUSCAR EN INTERNET Y GENERAR SENSI
+            </button>
+          </div>
+        </div>
+
+        <!-- PASO 2: ¿CÓMO QUIERES LA SENSI? (ALTA / MEDIA / BAJA) -->
+        <div id="genStep-2" class="hidden anim-enter rounded-2xl glass-panel p-4">
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <button type="button" id="backTo1Btn"
+              class="px-3 py-1.5 rounded-xl glass-card font-mono-hud text-[11px] font-extrabold cursor-pointer">
+              ← VOLVER
+            </button>
+            <span id="badgeStep2Device" class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase truncate max-w-[210px]"
+              style="background: rgba(0,240,255,0.14); color: var(--accent-primary);">
+              GALAXY S24 ULTRA
+            </span>
+          </div>
+
+          <span class="font-mono-hud text-[10px] font-extrabold tracking-widest uppercase" style="color: var(--accent-green);">
+            PASO 02 · VELOCIDAD DE ARRASTRE
+          </span>
+          <h2 class="text-xl font-black mt-1">¿Cómo quieres la sensi?</h2>
+          <p class="text-xs mt-1 mb-3.5" style="color: var(--text-secondary);">
+            Elige la respuesta al levantar mira para avanzar al ajuste de DPI.
+          </p>
+
+          <div class="flex flex-col gap-2.5">
+            <button type="button" data-curve="ALTA"
+              class="curve-card w-full p-4 rounded-2xl glass-card flex items-center justify-between gap-3 text-left transition-all cursor-pointer">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl font-black shrink-0"
+                  style="background: rgba(255,42,85,0.16); color: #ff2a55; border: 1px solid rgba(255,42,85,0.4);">
+                  ⚡
+                </div>
+                <div>
+                  <div class="text-base font-black">ALTA</div>
+                  <div class="text-xs mt-0.5" style="color: var(--text-secondary);">
+                    Arrastre corto y rápido · Ideal para escopetas, SMG y duelos cercanos.
+                  </div>
+                </div>
+              </div>
+              <span class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg shrink-0"
+                style="background: rgba(255,42,85,0.16); color: #ff2a55;">
+                ELEGIR →
+              </span>
+            </button>
+
+            <button type="button" data-curve="MEDIA"
+              class="curve-card w-full p-4 rounded-2xl glass-card flex items-center justify-between gap-3 text-left transition-all cursor-pointer">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl font-black shrink-0"
+                  style="background: rgba(0,240,255,0.16); color: var(--accent-primary); border: 1px solid var(--border-main);">
+                  ◎
+                </div>
+                <div>
+                  <div class="text-base font-black">MEDIA</div>
+                  <div class="text-xs mt-0.5" style="color: var(--text-secondary);">
+                    Equilibrio entre estabilidad en pecho y subida limpia a la cabeza.
+                  </div>
+                </div>
+              </div>
+              <span class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg shrink-0"
+                style="background: rgba(0,240,255,0.16); color: var(--accent-primary);">
+                ELEGIR →
+              </span>
+            </button>
+
+            <button type="button" data-curve="BAJA"
+              class="curve-card w-full p-4 rounded-2xl glass-card flex items-center justify-between gap-3 text-left transition-all cursor-pointer">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl font-black shrink-0"
+                  style="background: rgba(0,255,136,0.16); color: var(--accent-green); border: 1px solid rgba(0,255,136,0.4);">
+                  ⚓
+                </div>
+                <div>
+                  <div class="text-base font-black">BAJA</div>
+                  <div class="text-xs mt-0.5" style="color: var(--text-secondary);">
+                    Control firme sin que la mira se pase por encima del casco.
+                  </div>
+                </div>
+              </div>
+              <span class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg shrink-0"
+                style="background: rgba(0,255,136,0.16); color: var(--accent-green);">
+                ELEGIR →
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PASO 3: ¿VAS A USAR DPI? (CON DPI / SIN DPI) -->
+        <div id="genStep-3" class="hidden anim-enter rounded-2xl glass-panel p-4">
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <button type="button" id="backTo2Btn"
+              class="px-3 py-1.5 rounded-xl glass-card font-mono-hud text-[11px] font-extrabold cursor-pointer">
+              ← VOLVER
+            </button>
+            <span id="badgeStep3Summary" class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase truncate max-w-[215px]"
+              style="background: rgba(0,255,136,0.14); color: var(--accent-green);">
+              GALAXY S24 ULTRA · MEDIA
+            </span>
+          </div>
+
+          <span class="font-mono-hud text-[10px] font-extrabold tracking-widest uppercase" style="color: var(--accent-primary);">
+            PASO 03 · ANCHO MÍNIMO DEL SISTEMA
+          </span>
+          <h2 class="text-xl font-black mt-1">¿Vas a usar DPI?</h2>
+          <p class="text-xs mt-1 mb-3.5" style="color: var(--text-secondary);">
+            Selecciona si deseas ajustar el ancho mínimo (dp) o mantener el valor de fábrica.
+          </p>
+
+          <div class="flex flex-col gap-2.5">
+            <button type="button" id="chooseWithDpiBtn"
+              class="w-full p-4 rounded-2xl glass-card flex items-center justify-between gap-3 text-left transition-all cursor-pointer">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl font-black shrink-0"
+                  style="background: rgba(0,255,136,0.16); color: var(--accent-green); border: 1px solid rgba(0,255,136,0.4);">
+                  ✓
+                </div>
+                <div>
+                  <div class="text-base font-black">CON DPI</div>
+                  <div class="text-xs mt-0.5" style="color: var(--text-secondary);">
+                    Calcula el ancho mínimo (dp) recomendado para tu pantalla y curva.
+                  </div>
+                </div>
+              </div>
+              <span class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg shrink-0"
+                style="background: rgba(0,255,136,0.16); color: var(--accent-green);">
+                CONTINUAR →
+              </span>
+            </button>
+
+            <button type="button" id="chooseNoDpiBtn"
+              class="w-full p-4 rounded-2xl glass-card flex items-center justify-between gap-3 text-left transition-all cursor-pointer">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center text-xl font-black shrink-0"
+                  style="background: rgba(255,42,85,0.16); color: #ff2a55; border: 1px solid rgba(255,42,85,0.4);">
+                  ✕
+                </div>
+                <div>
+                  <div class="text-base font-black">SIN DPI</div>
+                  <div class="text-xs mt-0.5" style="color: var(--text-secondary);">
+                    Mantiene el DPI de fábrica sin tocar opciones de desarrollador.
+                  </div>
+                </div>
+              </div>
+              <span class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg shrink-0"
+                style="background: rgba(255,42,85,0.16); color: #ff2a55;">
+                CONTINUAR →
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PASO 4: TAMAÑO DEL BOTÓN (PEQUEÑO / MEDIANO / GRANDE) -->
+        <div id="genStep-4" class="hidden anim-enter rounded-2xl glass-panel p-4">
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <button type="button" id="backTo3Btn"
+              class="px-3 py-1.5 rounded-xl glass-card font-mono-hud text-[11px] font-extrabold cursor-pointer">
+              ← VOLVER
+            </button>
+            <span id="badgeStep4Summary" class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase truncate max-w-[220px]"
+              style="background: rgba(0,240,255,0.14); color: var(--accent-primary);">
+              MEDIA · CON DPI
+            </span>
+          </div>
+
+          <span class="font-mono-hud text-[10px] font-extrabold tracking-widest uppercase" style="color: var(--accent-green);">
+            PASO 04 · ERGONÓMICA DE DISPARO
+          </span>
+          <h2 class="text-xl font-black mt-1">Tamaño del botón</h2>
+          <p class="text-xs mt-1 mb-3.5" style="color: var(--text-secondary);">
+            Al tocar el tamaño iniciará la calibración del panel táctil y el algoritmo de mira.
+          </p>
+
+          <div class="flex flex-col gap-2.5">
+            <button type="button" data-btnsize="PEQUEÑO"
+              class="btn-size-card w-full p-4 rounded-2xl glass-card flex items-center justify-between gap-3 text-left transition-all cursor-pointer">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                  style="background: rgba(255,42,85,0.16); border: 1px solid rgba(255,42,85,0.4);">
+                  <span class="w-3.5 h-3.5 rounded-full bg-white inline-block"></span>
+                </div>
+                <div>
+                  <div class="text-base font-black">PEQUEÑO (36% – 42%)</div>
+                  <div class="text-xs mt-0.5" style="color: var(--text-secondary);">
+                    Mayor recorrido vertical disponible para levantar mira rápido.
+                  </div>
+                </div>
+              </div>
+              <span class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg shrink-0"
+                style="background: rgba(255,42,85,0.16); color: #ff2a55;">
+                CALIBRAR →
+              </span>
+            </button>
+
+            <button type="button" data-btnsize="MEDIANO"
+              class="btn-size-card w-full p-4 rounded-2xl glass-card flex items-center justify-between gap-3 text-left transition-all cursor-pointer">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                  style="background: rgba(0,240,255,0.16); border: 1px solid var(--border-main);">
+                  <span class="w-5 h-5 rounded-full bg-white inline-block"></span>
+                </div>
+                <div>
+                  <div class="text-base font-black">MEDIANO (45% – 52%)</div>
+                  <div class="text-xs mt-0.5" style="color: var(--text-secondary);">
+                    Punto óptimo para no fallar el toque en pulgares estándar.
+                  </div>
+                </div>
+              </div>
+              <span class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg shrink-0"
+                style="background: rgba(0,240,255,0.16); color: var(--accent-primary);">
+                CALIBRAR →
+              </span>
+            </button>
+
+            <button type="button" data-btnsize="GRANDE"
+              class="btn-size-card w-full p-4 rounded-2xl glass-card flex items-center justify-between gap-3 text-left transition-all cursor-pointer">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                  style="background: rgba(0,255,136,0.16); border: 1px solid rgba(0,255,136,0.4);">
+                  <span class="w-6 h-6 rounded-full bg-white inline-block"></span>
+                </div>
+                <div>
+                  <div class="text-base font-black">GRANDE (55% – 64%)</div>
+                  <div class="text-xs mt-0.5" style="color: var(--text-secondary);">
+                    Máxima seguridad de contacto en pantallas amplias o HUD de 2 dedos.
+                  </div>
+                </div>
+              </div>
+              <span class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg shrink-0"
+                style="background: rgba(0,255,136,0.16); color: var(--accent-green);">
+                CALIBRAR →
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PANTALLA INTERMEDIA: ESCANEO EN VIVO -->
+        <div id="genStep-scan" class="hidden anim-enter rounded-2xl glass-panel p-6 text-center">
+          <div class="relative w-28 h-28 mx-auto my-2 flex items-center justify-center">
+            <div class="ring-spinner absolute inset-0 rounded-full border-[3px]"
+              style="border-color: rgba(148,163,184,0.2); border-top-color: var(--accent-primary); border-right-color: var(--accent-green);"></div>
+            <span id="scanPctText" class="font-mono-hud text-2xl font-black" style="color: var(--accent-primary);">0%</span>
+          </div>
+          <div id="scanPhaseTitle" class="font-mono-hud text-xs font-extrabold tracking-widest uppercase mt-2"
+            style="color: var(--accent-green);">
+            ANALIZANDO PANEL TÁCTIL...
+          </div>
+          <div class="text-[11px] mt-1" style="color: var(--text-secondary);">
+            Por favor, no cierres esta pantalla.
+          </div>
+          <div class="w-full h-2 rounded-full overflow-hidden my-3" style="background: rgba(148,163,184,0.2);">
+            <div id="scanBarFill" class="h-full w-0 transition-all duration-150"
+              style="background: linear-gradient(90deg, var(--accent-primary), var(--accent-green));"></div>
+          </div>
+          <div id="scanLogBox" class="text-left rounded-xl p-3 font-mono-hud text-[11px] flex flex-col gap-1"
+            style="background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--accent-green);"></div>
+        </div>
+
+        <!-- PASO 5: CONFIGURACIÓN FINAL (CON SLIDERS EDITABLES, ARMAS, DPI Y BOTONES) -->
+        <div id="genStep-5" class="hidden anim-enter rounded-2xl glass-panel p-4">
+          <div class="flex items-start justify-between gap-2 pb-3" style="border-bottom: 1px solid var(--border-subtle);">
+            <div>
+              <div class="font-mono-hud text-[10px] font-extrabold tracking-widest uppercase" style="color: var(--accent-primary);">
+                ● CONFIGURACIÓN CALIBRADA · SENSI-SYS
+              </div>
+              <h2 id="resDeviceTitle" class="text-lg sm:text-xl font-black uppercase mt-0.5 leading-tight">
+                GALAXY S24 ULTRA
+              </h2>
+            </div>
+            <button type="button" id="changeTeamBtn"
+              class="px-3 py-1.5 rounded-xl glass-card font-mono-hud text-[10px] font-extrabold shrink-0 cursor-pointer">
+              CAMBIAR
+            </button>
+          </div>
+
+          <!-- Píldoras resumen -->
+          <div id="resMetaPills" class="flex flex-wrap gap-1.5 mt-3"></div>
+
+          <!-- Filtro rápido por categoría de arma (igual que en tu referencia Élite) -->
+          <div id="weaponPillsRow" class="flex gap-1.5 overflow-x-auto no-scrollbar py-2.5 mt-1"></div>
+
+          <!-- 6 Sliders interactivos (0 - 200) -->
+          <div id="resSlidersList" class="flex flex-col gap-2.5 mt-1"></div>
+
+          <!-- Tarjetas inferiores: TAMAÑO BOTÓN y DPI -->
+          <div class="grid grid-cols-2 gap-2.5 mt-3.5">
+            <div class="glass-card rounded-2xl p-3 flex items-center justify-between gap-2">
+              <div>
+                <div class="font-mono-hud text-[10px] font-bold uppercase" style="color: var(--text-secondary);">TAMAÑO BOTÓN</div>
+                <div id="resFirePct" class="font-mono-hud text-2xl font-black mt-0.5" style="color: var(--accent-green);">48%</div>
+                <div id="resFireDesc" class="text-[11px]" style="color: var(--text-secondary);">Rango mediano</div>
+              </div>
+              <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+                style="background: rgba(0,240,255,0.14); border: 1px solid var(--border-main);">
+                <span id="firePreviewCircle" class="rounded-full inline-block transition-all"
+                  style="width: 22px; height: 22px; background: var(--accent-primary);"></span>
+              </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-3">
+              <div class="font-mono-hud text-[10px] font-bold uppercase" style="color: var(--text-secondary);">DPI (ANDROID)</div>
+              <div id="resDpiNumber" class="font-mono-hud text-2xl font-black mt-0.5" style="color: var(--accent-primary);">506 dp</div>
+              <div id="resDpiDesc" class="text-[11px]" style="color: var(--text-secondary);">Fábrica: 411 dp</div>
+            </div>
+          </div>
+
+          <!-- Escala DPI sugerida por curva -->
+          <div class="mt-3 glass-card rounded-2xl p-3">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-mono-hud text-[10px] font-extrabold uppercase" style="color: var(--text-secondary);">
+                ESCALA DPI SUGERIDA POR CURVA
+              </span>
+              <span id="resCurveTag" class="font-mono-hud text-[10px] font-extrabold uppercase" style="color: var(--accent-primary);">
+                CURVA MEDIA
+              </span>
+            </div>
+            <div class="grid grid-cols-3 gap-1.5 text-center">
+              <div class="p-2 rounded-xl" style="background: var(--bg-input); border: 1px solid var(--border-subtle);">
+                <span class="block font-mono-hud text-[9px]" style="color: var(--text-secondary);">BAJA</span>
+                <span id="scaleDpiLow" class="font-mono-hud text-xs font-black">456 dp</span>
+              </div>
+              <div class="p-2 rounded-xl" style="background: var(--bg-input); border: 1px solid var(--border-subtle);">
+                <span class="block font-mono-hud text-[9px]" style="color: var(--text-secondary);">MEDIA</span>
+                <span id="scaleDpiMid" class="font-mono-hud text-xs font-black">506 dp</span>
+              </div>
+              <div class="p-2 rounded-xl" style="background: var(--bg-input); border: 1px solid var(--border-subtle);">
+                <span class="block font-mono-hud text-[9px]" style="color: var(--text-secondary);">ALTA</span>
+                <span id="scaleDpiHigh" class="font-mono-hud text-xs font-black">556 dp</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tip táctico -->
+          <div id="tacticalTipBox" class="mt-3 p-3 rounded-xl font-mono-hud text-[11px] leading-relaxed"
+            style="background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-secondary);">
+            TIP TÁCTICO: Arrastre progresivo y firme desde el pecho hacia la cabeza sin sobrepasar el objetivo.
+          </div>
+
+          <!-- Botón Regenerar Nueva Sensibilidad -->
+          <button type="button" id="regenVariantBtn"
+            class="mt-3.5 w-full h-12 rounded-2xl font-extrabold text-xs tracking-wider uppercase transition-all cursor-pointer"
+            style="background: var(--accent-green); color: #05070a;">
+            ⚡ GENERAR NUEVA SENSIBILIDAD
+          </button>
+
+          <!-- Botones Copiar y Guardar en Mis Sensis -->
+          <div class="grid grid-cols-2 gap-2 mt-2">
+            <button type="button" id="copyResultBtn"
+              class="h-11 rounded-xl font-extrabold text-xs tracking-wider uppercase cursor-pointer"
+              style="background: var(--accent-primary); color: var(--accent-contrast);">
+              ⎘ COPIAR CONFIG
+            </button>
+            <button type="button" id="saveResultBtn"
+              class="h-11 rounded-xl glass-card font-extrabold text-xs tracking-wider uppercase cursor-pointer"
+              style="border-color: var(--border-main); color: var(--accent-primary);">
+              💾 GUARDAR EN MIS SENSIS
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- =============================================================== -->
+      <!-- APARTADO 2: COMBOS DE HABILIDADES                               -->
+      <!-- =============================================================== -->
+      <section id="panel-combos" class="hidden anim-enter rounded-2xl glass-panel p-4">
+        <div class="font-mono-hud text-[10px] font-extrabold tracking-widest uppercase" style="color: var(--accent-primary);">
+          ESTRATEGIA BATTLE ROYALE & DUELO DE ESCUADRAS
+        </div>
+        <h2 class="text-xl font-black mt-1">Combos de Habilidades</h2>
+        <p class="text-xs mt-1 mb-3.5" style="color: var(--text-secondary);">
+          Combinaciones tácticas de activa + 3 pasivas listas para copiar o usar en tu escuadra.
+        </p>
+        <div id="combosListBox" class="flex flex-col gap-3"></div>
+      </section>
+
+      <!-- =============================================================== -->
+      <!-- APARTADO 3: MEJORES SENSIS                                      -->
+      <!-- =============================================================== -->
+      <section id="panel-best" class="hidden anim-enter rounded-2xl glass-panel p-4">
+        <div class="font-mono-hud text-[10px] font-extrabold tracking-widest uppercase" style="color: #ff2a55;">
+          PERFILES VERIFICADOS · VOTACIÓN DE COMUNIDAD
+        </div>
+        <h2 class="text-xl font-black mt-1">Mejores Sensis</h2>
+        <p class="text-xs mt-1 mb-3" style="color: var(--text-secondary);">
+          Filtra por marca o velocidad y carga cualquier perfil directamente al generador.
+        </p>
+
+        <div class="grid grid-cols-2 gap-2 mb-3">
+          <select id="bestBrandFilter" class="hud-input h-10 px-3 rounded-xl font-mono-hud text-xs font-bold focus:outline-none">
+            <option value="ALL">Todas las Marcas</option>
+          </select>
+          <select id="bestCurveFilter" class="hud-input h-10 px-3 rounded-xl font-mono-hud text-xs font-bold focus:outline-none">
+            <option value="ALL">Todas las Curvas</option>
+            <option value="ALTA">Curva ALTA</option>
+            <option value="MEDIA">Curva MEDIA</option>
+            <option value="BAJA">Curva BAJA</option>
+          </select>
+        </div>
+
+        <div id="bestSensisListBox" class="flex flex-col gap-2.5"></div>
+      </section>
+
+      <!-- =============================================================== -->
+      <!-- APARTADO 4: MIS SENSIS GUARDADAS                                -->
+      <!-- =============================================================== -->
+      <section id="panel-saved" class="hidden anim-enter rounded-2xl glass-panel p-4">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <div class="font-mono-hud text-[10px] font-extrabold tracking-widest uppercase" style="color: var(--accent-green);">
+              MEMORIA LOCAL · CHALOZKY.GB
+            </div>
+            <h2 class="text-xl font-black mt-0.5">Mis Sensis Guardadas</h2>
+          </div>
+          <span id="savedHeaderCount" class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-full"
+            style="background: rgba(0,255,136,0.15); color: var(--accent-green);">
+            0 PERFILES
+          </span>
+        </div>
+        <p class="text-xs mt-1 mb-3.5" style="color: var(--text-secondary);">
+          Tus configuraciones personalizadas quedan guardadas en este navegador para cargarlas al instante.
+        </p>
+        <div id="savedListBox" class="flex flex-col gap-2.5"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- TOAST FLOTANTE -->
+  <div id="toastBanner"
+    class="fixed bottom-5 left-1/2 -translate-x-1/2 translate-y-6 opacity-0 pointer-events-none z-50 px-4 py-2.5 rounded-full glass-panel font-mono-hud text-xs font-extrabold transition-all duration-200 whitespace-nowrap"
+    style="border-color: var(--accent-green); color: var(--accent-green);">
+    ✔ Listo
+  </div>
+
+  <script>
+    // =========================================================================
+    // MOTOR DE LLAMAS ANIMADAS (60 FPS EN CANVAS)
+    // =========================================================================
+    const fireCanvas = document.getElementById("fireCanvas");
+    const fCtx = fireCanvas.getContext("2d");
+    let fireMode = localStorage.getItem("sensisys_fire_mode") || "crimson"; // crimson | cyan | off
+    let embers = [];
+
+    function resizeFireCanvas() {
+      fireCanvas.width = window.innerWidth;
+      fireCanvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeFireCanvas);
+    resizeFireCanvas();
+
+    function spawnEmber(randomY) {
+      return {
+        x: Math.random() * fireCanvas.width,
+        y: randomY ? Math.random() * fireCanvas.height : fireCanvas.height + Math.random() * 40,
+        r: 1.5 + Math.random() * 3.8,
+        vy: 0.7 + Math.random() * 2.1,
+        vx: (Math.random() - 0.5) * 0.9,
+        alpha: 0.25 + Math.random() * 0.65,
+        phase: Math.random() * Math.PI * 2
+      };
+    }
+
+    for (let i = 0; i < 65; i++) embers.push(spawnEmber(true));
+
+    let fireTime = 0;
+    function renderFireLoop() {
+      fCtx.clearRect(0, 0, fireCanvas.width, fireCanvas.height);
+
+      if (fireMode !== "off") {
+        fireTime += 0.032;
+        const w = fireCanvas.width;
+        const h = fireCanvas.height;
+        const isElite = document.documentElement.getAttribute("data-theme") === "elite";
+        const alphaScale = isElite ? 0.34 : 0.85;
+
+        const c1 = fireMode === "cyan" ? `rgba(0, 240, 255, ${0.26 * alphaScale})` : `rgba(255, 42, 85, ${0.30 * alphaScale})`;
+        const c2 = fireMode === "cyan" ? `rgba(0, 255, 136, ${0.14 * alphaScale})` : `rgba(255, 145, 0, ${0.20 * alphaScale})`;
+
+        // Ondas de llamas ascendentes desde la base
+        for (let layer = 0; layer < 3; layer++) {
+          fCtx.beginPath();
+          fCtx.moveTo(0, h);
+          const baseH = h * (0.20 + layer * 0.06);
+          for (let x = 0; x <= w + 24; x += 24) {
+            const wave =
+              Math.sin(x * 0.012 + fireTime * (1.4 + layer * 0.35) + layer) * 26 +
+              Math.cos(x * 0.025 - fireTime * 2.1) * 16;
+            fCtx.lineTo(x, h - baseH + wave);
+          }
+          fCtx.lineTo(w, h);
+          fCtx.closePath();
+
+          const grad = fCtx.createLinearGradient(0, h - baseH - 40, 0, h);
+          grad.addColorStop(0, "transparent");
+          grad.addColorStop(0.55, c2);
+          grad.addColorStop(1, c1);
+          fCtx.fillStyle = grad;
+          fCtx.fill();
+        }
+
+        // Brasas y chispas flotantes
+        for (let i = 0; i < embers.length; i++) {
+          const e = embers[i];
+          e.y -= e.vy;
+          e.x += e.vx + Math.sin(fireTime * 2 + e.phase) * 0.45;
+          if (e.y < -15) embers[i] = spawnEmber(false);
+
+          fCtx.beginPath();
+          fCtx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
+          fCtx.fillStyle = fireMode === "cyan"
+            ? `rgba(0, 240, 255, ${e.alpha * alphaScale})`
+            : `rgba(255, 165, 40, ${e.alpha * alphaScale})`;
+          fCtx.fill();
+        }
+      }
+      requestAnimationFrame(renderFireLoop);
+    }
+    requestAnimationFrame(renderFireLoop);
+
+    function syncFireButtonUI() {
+      const lbl = document.getElementById("fireModeLabel");
+      if (fireMode === "crimson") lbl.textContent = "CARMESÍ";
+      else if (fireMode === "cyan") lbl.textContent = "CIAN";
+      else lbl.textContent = "OFF";
+    }
+
+    // =========================================================================
+    // CATÁLOGO COMPLETO DE +430 MODELOS REALES EN 24 MARCAS
+    // =========================================================================
+    const BRAND_MODELS = {
+      "SAMSUNG": [
+        ["Galaxy S25 Ultra", 412, 120], ["Galaxy S25+", 412, 120], ["Galaxy S25", 412, 120],
+        ["Galaxy S24 Ultra", 411, 120], ["Galaxy S24+", 411, 120], ["Galaxy S24", 411, 120], ["Galaxy S24 FE", 411, 120],
+        ["Galaxy S23 Ultra", 411, 120], ["Galaxy S23+", 411, 120], ["Galaxy S23", 411, 120], ["Galaxy S23 FE", 384, 120],
+        ["Galaxy S22 Ultra", 411, 120], ["Galaxy S22+", 411, 120], ["Galaxy S22", 411, 120],
+        ["Galaxy S21 Ultra", 411, 120], ["Galaxy S21+", 411, 120], ["Galaxy S21", 411, 120], ["Galaxy S21 FE", 384, 120],
+        ["Galaxy S20 Ultra", 411, 120], ["Galaxy S20 FE", 384, 120], ["Galaxy Note 20 Ultra", 411, 120],
+        ["Galaxy A56 5G", 411, 120], ["Galaxy A55 5G", 411, 120], ["Galaxy A54 5G", 411, 120], ["Galaxy A53 5G", 411, 120], ["Galaxy A52s 5G", 411, 120],
+        ["Galaxy A36 5G", 411, 120], ["Galaxy A35 5G", 411, 120], ["Galaxy A34 5G", 411, 120], ["Galaxy A33 5G", 411, 90],
+        ["Galaxy A25 5G", 411, 120], ["Galaxy A24", 384, 90], ["Galaxy A23", 384, 90],
+        ["Galaxy A16 5G", 411, 90], ["Galaxy A15 5G", 411, 90], ["Galaxy A15", 411, 90], ["Galaxy A14", 384, 90], ["Galaxy A13", 360, 60],
+        ["Galaxy A06", 384, 60], ["Galaxy A05s", 384, 90], ["Galaxy A05", 360, 60],
+        ["Galaxy M55 5G", 411, 120], ["Galaxy M54 5G", 411, 120], ["Galaxy M35 5G", 411, 120], ["Galaxy M34 5G", 411, 120], ["Galaxy M15 5G", 384, 90],
+        ["Galaxy Z Fold6", 368, 120], ["Galaxy Z Fold5", 368, 120], ["Galaxy Z Flip6", 412, 120], ["Galaxy Z Flip5", 412, 120]
+      ],
+      "APPLE": [
+        ["iPhone 17 Pro Max", 440, 120], ["iPhone 17 Pro", 402, 120], ["iPhone 17", 393, 120],
+        ["iPhone 16 Pro Max", 440, 120], ["iPhone 16 Pro", 402, 120], ["iPhone 16 Plus", 428, 60], ["iPhone 16", 390, 60],
+        ["iPhone 15 Pro Max", 430, 120], ["iPhone 15 Pro", 393, 120], ["iPhone 15 Plus", 428, 60], ["iPhone 15", 390, 60],
+        ["iPhone 14 Pro Max", 430, 120], ["iPhone 14 Pro", 393, 120], ["iPhone 14 Plus", 428, 60], ["iPhone 14", 390, 60],
+        ["iPhone 13 Pro Max", 428, 120], ["iPhone 13 Pro", 390, 120], ["iPhone 13", 390, 60], ["iPhone 13 Mini", 375, 60],
+        ["iPhone 12 Pro Max", 428, 60], ["iPhone 12 Pro", 390, 60], ["iPhone 12", 390, 60], ["iPhone 12 Mini", 375, 60],
+        ["iPhone 11 Pro Max", 414, 60], ["iPhone 11 Pro", 375, 60], ["iPhone 11", 414, 60],
+        ["iPhone XS Max", 414, 60], ["iPhone XR", 414, 60], ["iPhone SE (3ra Gen)", 375, 60],
+        ["iPad Pro M4 13", 520, 120], ["iPad Pro M4 11", 480, 120], ["iPad Air M2", 460, 60], ["iPad 10 Gen", 440, 60], ["iPad Mini 7", 410, 60]
+      ],
+      "XIAOMI": [
+        ["Xiaomi 15 Ultra", 440, 120], ["Xiaomi 15 Pro", 440, 120], ["Xiaomi 15", 440, 120],
+        ["Xiaomi 14 Ultra", 440, 120], ["Xiaomi 14T Pro", 440, 144], ["Xiaomi 14T", 440, 144], ["Xiaomi 14", 440, 120],
+        ["Xiaomi 13 Ultra", 440, 120], ["Xiaomi 13T Pro", 440, 144], ["Xiaomi 13T", 440, 144], ["Xiaomi 13", 440, 120],
+        ["Xiaomi 12T Pro", 440, 120], ["Xiaomi 12T", 440, 120], ["Xiaomi 12 Pro", 440, 120], ["Xiaomi 12", 440, 120],
+        ["Xiaomi 11T Pro", 392, 120], ["Xiaomi 11T", 392, 120], ["Mi 11 Ultra", 411, 120], ["Mi 10T Pro", 392, 144]
+      ],
+      "REDMI": [
+        ["Redmi Note 14 Pro+ 5G", 440, 120], ["Redmi Note 14 Pro 5G", 440, 120], ["Redmi Note 14 Pro 4G", 392, 120], ["Redmi Note 14", 392, 120],
+        ["Redmi Note 13 Pro+ 5G", 440, 120], ["Redmi Note 13 Pro 5G", 440, 120], ["Redmi Note 13 Pro 4G", 392, 120], ["Redmi Note 13", 392, 120],
+        ["Redmi Note 12 Pro+ 5G", 392, 120], ["Redmi Note 12 Pro 5G", 392, 120], ["Redmi Note 12S", 392, 90], ["Redmi Note 12", 392, 120],
+        ["Redmi Note 11 Pro+ 5G", 392, 120], ["Redmi Note 11 Pro", 392, 120], ["Redmi Note 11S", 392, 90], ["Redmi Note 11", 392, 90],
+        ["Redmi Note 10 Pro", 392, 120], ["Redmi Note 10S", 392, 60], ["Redmi Note 10", 392, 60],
+        ["Redmi Note 9 Pro", 392, 60], ["Redmi Note 9S", 392, 60], ["Redmi Note 8 Pro", 392, 60],
+        ["Redmi 14C", 360, 120], ["Redmi 13C", 360, 90], ["Redmi 13", 392, 90], ["Redmi 12", 392, 90], ["Redmi 12C", 360, 60], ["Redmi A3", 360, 90]
+      ],
+      "POCO": [
+        ["POCO F7 Ultra", 440, 120], ["POCO F7 Pro", 440, 120], ["POCO F6 Pro", 440, 120], ["POCO F6", 440, 120],
+        ["POCO F5 Pro", 440, 120], ["POCO F5", 392, 120], ["POCO F4 GT", 392, 120], ["POCO F3", 392, 120],
+        ["POCO X7 Pro", 440, 120], ["POCO X7", 440, 120], ["POCO X6 Pro 5G", 440, 120], ["POCO X6 5G", 440, 120],
+        ["POCO X5 Pro 5G", 392, 120], ["POCO X5 5G", 392, 120], ["POCO X4 Pro 5G", 392, 120], ["POCO X3 Pro", 392, 120],
+        ["POCO M6 Pro", 392, 120], ["POCO M6", 392, 90], ["POCO M5s", 392, 60], ["POCO M5", 392, 90], ["POCO C75", 360, 120], ["POCO C65", 360, 90]
+      ],
+      "HONOR": [
+        ["Honor Magic8 Pro 5G", 440, 120], ["Honor Magic7 Pro 5G", 440, 120], ["Honor Magic7 Lite", 412, 120],
+        ["Honor Magic6 Pro", 440, 120], ["Honor Magic6 Lite", 412, 120], ["Honor Magic5 Pro", 432, 120], ["Honor Magic5 Lite", 412, 120],
+        ["Honor Magic V3 5G", 400, 120], ["Honor Magic V2", 400, 120],
+        ["Honor 600 Pro", 432, 120], ["Honor 600 5G", 412, 120], ["Honor 600 Elite 5G", 420, 120], ["Honor 600 Smart", 384, 120],
+        ["Honor 400", 412, 120], ["Honor 200 Pro", 432, 120], ["Honor 200", 412, 120], ["Honor 200 Lite", 412, 90], ["Honor 90", 432, 120],
+        ["Honor X9c 5G", 412, 120], ["Honor X9b 5G", 412, 120], ["Honor X9a", 412, 120],
+        ["Honor X8b", 392, 90], ["Honor X8a", 392, 90], ["Honor X7c", 384, 120], ["Honor X7b", 384, 90],
+        ["Honor X6b", 360, 90], ["Honor X5c Plus", 360, 90], ["Honor X5c", 360, 90], ["Honor X5 Plus", 360, 90]
+      ],
+      "MOTOROLA": [
+        ["Edge 50 Ultra", 412, 144], ["Edge 50 Pro", 412, 144], ["Edge 50 Fusion", 412, 144], ["Edge 50 Neo", 412, 120],
+        ["Edge 40 Pro", 412, 165], ["Edge 40 Neo", 412, 144], ["Edge 40", 412, 144], ["Edge 30 Ultra", 412, 144], ["Edge 30 Fusion", 412, 144],
+        ["Razr 50 Ultra", 412, 165], ["Razr 40 Ultra", 412, 165],
+        ["Moto G85 5G", 412, 120], ["Moto G84 5G", 412, 120], ["Moto G75 5G", 412, 120], ["Moto G73 5G", 412, 120],
+        ["Moto G64 5G", 412, 120], ["Moto G54 5G", 412, 120], ["Moto G53 5G", 392, 120],
+        ["Moto G35 5G", 384, 120], ["Moto G34 5G", 360, 120], ["Moto G24 Power", 360, 90], ["Moto G14", 392, 60], ["Moto G04s", 360, 90]
+      ],
+      "REALME": [
+        ["Realme GT 7 Pro", 440, 120], ["Realme GT 6", 412, 120], ["Realme GT 6T", 412, 120], ["Realme GT Neo 5", 412, 144], ["Realme GT 2 Pro", 412, 120],
+        ["Realme 13 Pro+ 5G", 412, 120], ["Realme 13+ 5G", 412, 120], ["Realme 12 Pro+ 5G", 412, 120], ["Realme 12 Pro 5G", 412, 120],
+        ["Realme 12+ 5G", 412, 120], ["Realme 11 Pro+ 5G", 412, 120], ["Realme 11 5G", 392, 90],
+        ["Realme C75", 384, 90], ["Realme C67", 360, 90], ["Realme C65", 360, 90], ["Realme C55", 392, 90], ["Realme Narzo 70 Pro", 412, 120]
+      ],
+      "OPPO": [
+        ["OPPO Find X8 Pro", 440, 120], ["OPPO Find X7 Ultra", 440, 120], ["OPPO Find X6 Pro", 440, 120],
+        ["OPPO Reno 13 F 5G", 412, 120], ["OPPO Reno 12 Pro 5G", 412, 120], ["OPPO Reno 12 5G", 412, 120], ["OPPO Reno 12 F 5G", 412, 120],
+        ["OPPO Reno 11 Pro 5G", 412, 120], ["OPPO Reno 11 F 5G", 412, 120], ["OPPO Reno 10 Pro+", 412, 120], ["OPPO Reno 8T 5G", 412, 120],
+        ["OPPO A98 5G", 412, 120], ["OPPO A79 5G", 392, 90], ["OPPO A60", 360, 90], ["OPPO A58", 392, 60], ["OPPO A38", 360, 90]
+      ],
+      "VIVO": [
+        ["Vivo X200 Pro", 440, 120], ["Vivo X100 Pro", 440, 120], ["Vivo X90 Pro", 440, 120],
+        ["Vivo V40 Pro", 412, 120], ["Vivo V40", 412, 120], ["Vivo V30 Pro", 412, 120], ["Vivo V30", 412, 120], ["Vivo V29 5G", 412, 120],
+        ["Vivo Y100", 412, 120], ["Vivo Y36", 392, 90], ["Vivo Y28", 360, 90], ["Vivo Y18", 360, 90],
+        ["iQOO 13", 440, 144], ["iQOO 12", 440, 144], ["iQOO Neo 9 Pro", 440, 144], ["iQOO Z9 Turbo", 412, 144]
+      ],
+      "ONEPLUS": [
+        ["OnePlus 13", 440, 120], ["OnePlus 12", 440, 120], ["OnePlus 12R", 440, 120], ["OnePlus 11", 440, 120], ["OnePlus 10 Pro", 412, 120],
+        ["OnePlus Nord 4", 412, 120], ["OnePlus Nord 3 5G", 412, 120], ["OnePlus Nord CE 4", 412, 120], ["OnePlus Nord CE 3 Lite", 392, 120], ["OnePlus Open", 400, 120]
+      ],
+      "HUAWEI": [
+        ["Huawei Pura 70 Ultra", 432, 120], ["Huawei Pura 70 Pro", 432, 120], ["Huawei Pura 70", 412, 120],
+        ["Huawei Mate 60 Pro", 432, 120], ["Huawei Mate 50 Pro", 432, 120], ["Huawei P60 Pro", 432, 120], ["Huawei P50 Pro", 432, 120],
+        ["Huawei Nova 12s", 412, 120], ["Huawei Nova 12 SE", 412, 90], ["Huawei Nova 11 Pro", 412, 120], ["Huawei Nova Y91", 392, 90], ["Huawei Nova Y72", 360, 90]
+      ],
+      "INFINIX": [
+        ["Infinix GT 20 Pro", 412, 144], ["Infinix GT 10 Pro", 412, 120], ["Infinix Zero 40 5G", 412, 144], ["Infinix Zero 30 5G", 412, 144],
+        ["Infinix Note 40 Pro+ 5G", 412, 120], ["Infinix Note 40 Pro", 412, 120], ["Infinix Note 40", 412, 120], ["Infinix Note 30 Pro", 392, 120],
+        ["Infinix Hot 50 Pro+", 392, 120], ["Infinix Hot 40 Pro", 392, 120], ["Infinix Hot 40i", 360, 90], ["Infinix Smart 8", 360, 90]
+      ],
+      "TECNO": [
+        ["Tecno Camon 30 Premier", 412, 120], ["Tecno Camon 30 Pro 5G", 412, 120], ["Tecno Camon 30", 412, 120], ["Tecno Camon 20 Pro", 392, 120],
+        ["Tecno Pova 6 Pro 5G", 412, 120], ["Tecno Pova 6", 412, 120], ["Tecno Pova 5 Pro", 392, 120], ["Tecno Pova 5", 392, 120],
+        ["Tecno Spark 30 Pro", 392, 120], ["Tecno Spark 20 Pro+", 392, 120], ["Tecno Spark 20C", 360, 90], ["Tecno Phantom V Fold2", 400, 120]
+      ],
+      "ASUS": [
+        ["ASUS ROG Phone 9 Pro", 440, 185], ["ASUS ROG Phone 9", 440, 185],
+        ["ASUS ROG Phone 8 Pro", 440, 165], ["ASUS ROG Phone 8", 440, 165],
+        ["ASUS ROG Phone 7 Ultimate", 440, 165], ["ASUS ROG Phone 6 Pro", 440, 165],
+        ["ASUS Zenfone 11 Ultra", 412, 144], ["ASUS Zenfone 10", 412, 144]
+      ],
+      "REDMAGIC": [
+        ["RedMagic 10 Pro+", 440, 144], ["RedMagic 10 Pro", 440, 144],
+        ["RedMagic 9S Pro+", 440, 120], ["RedMagic 9S Pro", 440, 120], ["RedMagic 9 Pro", 440, 120],
+        ["RedMagic 8S Pro", 440, 120], ["RedMagic 8 Pro", 440, 120], ["RedMagic 7S Pro", 440, 120]
+      ],
+      "BLACK SHARK": [
+        ["Black Shark 5 Pro", 440, 144], ["Black Shark 5", 412, 144],
+        ["Black Shark 4 Pro", 412, 144], ["Black Shark 4", 412, 144], ["Black Shark 3 Pro", 412, 90]
+      ],
+      "GOOGLE PIXEL": [
+        ["Pixel 9 Pro XL", 430, 120], ["Pixel 9 Pro", 412, 120], ["Pixel 9", 412, 120],
+        ["Pixel 8 Pro", 430, 120], ["Pixel 8", 412, 120], ["Pixel 8a", 412, 120],
+        ["Pixel 7 Pro", 412, 120], ["Pixel 7", 412, 90], ["Pixel 7a", 412, 90], ["Pixel 6 Pro", 412, 120]
+      ],
+      "NOTHING": [
+        ["Nothing Phone (2a) Plus", 412, 120], ["Nothing Phone (2a)", 412, 120],
+        ["Nothing Phone (2)", 412, 120], ["Nothing Phone (1)", 412, 120], ["CMF Phone 1", 412, 120]
+      ],
+      "ZTE": [
+        ["ZTE Nubia Z60 Ultra", 440, 120], ["ZTE Nubia Z50S Pro", 440, 120], ["ZTE Nubia Neo 2 5G", 412, 120],
+        ["ZTE Blade V50 Design", 392, 90], ["ZTE Blade A75", 360, 90], ["ZTE Blade A54", 360, 60]
+      ],
+      "LENOVO": [
+        ["Lenovo Legion Y90", 440, 144], ["Lenovo Legion Duel 2", 440, 144],
+        ["Lenovo Tab Y700 (2024)", 500, 165], ["Lenovo Tab P12", 480, 60]
+      ],
+      "SONY": [
+        ["Sony Xperia 1 VI", 412, 120], ["Sony Xperia 1 V", 412, 120],
+        ["Sony Xperia 5 V", 412, 120], ["Sony Xperia 10 VI", 392, 60]
+      ],
+      "CUBOT": [
+        ["Cubot KingKong X", 412, 120], ["Cubot Max 5", 412, 144], ["Cubot P80", 392, 60], ["Cubot Note 50", 360, 90]
+      ],
+      "FREEYOND": [
+        ["FreeYond M5A", 392, 90], ["FreeYond M5", 392, 90], ["FreeYond F9", 360, 60]
+      ]
+    };
+
+    const BRANDS_LIST = ["TODOS", ...Object.keys(BRAND_MODELS)];
+    const DEVICES = [];
+    let devCounter = 1;
+    Object.entries(BRAND_MODELS).forEach(([brand, models]) => {
+      models.forEach(([name, factoryDpi, hz]) => {
+        DEVICES.push({ id: devCounter++, brand, name, factoryDpi, hz, isOnlineAi: false });
+      });
+    });
+
+    const WEAPONS = ["TODAS", "AR (SCAR/AK)", "SMG (MP5/MP40)", "DMR (AC80/WOODPECKER/SVD)", "ESCOPETAS", "FRANCO"];
+
+    const COMBOS_DATA = [
+      {
+        title: "COMBO VIDA INFINITA · RUSH PURO",
+        badge: "DUELO / BR",
+        desc: "Permite rushear sin miedo, curarte al instante tras derribar y mantener ventaja constante en enfrentamientos seguidos.",
+        skills: ["Activa: Tatsuya / Alok", "Jota (Robo de vida)", "Kelly (Velocidad)", "Moco (Marcado táctico)"]
+      },
+      {
+        title: "COMBO RESISTENCIA Y VELOCIDAD",
+        badge: "CLASIFICATORIA BR",
+        desc: "Equilibra movilidad de rotación con blindaje extra para intercambios de larga y media distancia.",
+        skills: ["Activa: K / Orion", "Andrew (Blindaje)", "Hayato (Penetración)", "Leon (Recuperación HP)"]
+      },
+      {
+        title: "COMBO PRECISIÓN AC80 / WOODPECKER / SVD",
+        badge: "TIRADOR / SOPORTE",
+        desc: "Maximiza el daño a distancia y cierra la dispersión al apuntar con miras 2x y 4x.",
+        skills: ["Activa: Homero / Iris", "Maro (Daño distancia)", "Laura (Precisión mira)", "Rafael (Silenciador)"]
+      },
+      {
+        title: "COMBO ROMPE PAREDES & PRESIÓN",
+        badge: "ESCUADRA",
+        desc: "Ideal para abrir cobertura rival rápido y asegurar el remate en zonas finales.",
+        skills: ["Activa: Skyler / Wukong", "Nairi (Daño a paredes)", "Kairos (Rompe escudo)", "Joseph (Inmunidad/Vel)"]
+      }
+    ];
+
+    const BEST_PRESETS = [
+      { id: "b1", brand: "SAMSUNG", deviceName: "Galaxy S24 Ultra", curve: "ALTA", useDpi: true, btnSize: "MEDIANO", g: 192, pr: 178, x2: 184, x4: 172, awm: 112, cam: 180, btn: 48, up: 412, down: 9 },
+      { id: "b2", brand: "HONOR", deviceName: "Honor X5c Plus", curve: "ALTA", useDpi: true, btnSize: "PEQUEÑO", g: 195, pr: 184, x2: 188, x4: 176, awm: 115, cam: 185, btn: 40, up: 289, down: 6 },
+      { id: "b3", brand: "REDMI", deviceName: "Redmi Note 13 Pro 5G", curve: "MEDIA", useDpi: true, btnSize: "MEDIANO", g: 184, pr: 165, x2: 174, x4: 158, awm: 100, cam: 170, btn: 49, up: 344, down: 11 },
+      { id: "b4", brand: "APPLE", deviceName: "iPhone 16 Pro Max", curve: "MEDIA", useDpi: false, btnSize: "MEDIANO", g: 178, pr: 162, x2: 170, x4: 156, awm: 96, cam: 166, btn: 47, up: 378, down: 8 },
+      { id: "b5", brand: "OPPO", deviceName: "OPPO Reno 13 F 5G", curve: "ALTA", useDpi: true, btnSize: "MEDIANO", g: 190, pr: 176, x2: 182, x4: 170, awm: 108, cam: 178, btn: 48, up: 251, down: 5 },
+      { id: "b6", brand: "POCO", deviceName: "POCO X6 Pro 5G", curve: "BAJA", useDpi: true, btnSize: "GRANDE", g: 166, pr: 150, x2: 158, x4: 144, awm: 88, cam: 154, btn: 58, up: 229, down: 7 }
+    ];
+
+    // =========================================================================
+    // ESTADO GLOBAL DE LA APLICACIÓN
+    // =========================================================================
+    const state = {
+      activeTab: "generator",
+      selectedBrand: "TODOS",
+      searchQuery: "",
+      selectedDevice: DEVICES.find(d => d.name === "Galaxy S24 Ultra") || DEVICES[0],
+      curve: "MEDIA",
+      useDpi: true,
+      btnSize: "MEDIANO",
+      weapon: "TODAS",
+      variantIdx: 0,
+      currentResult: null,
+      savedList: JSON.parse(localStorage.getItem("sensisys_saved_v3") || "[]"),
+      votes: JSON.parse(localStorage.getItem("sensisys_votes_v3") || "{}")
+    };
+
+    let scanTimer = null;
+
+    // =========================================================================
+    // TOAST & UTILIDADES
+    // =========================================================================
+    let toastTimer = null;
+    function showToast(msg) {
+      const el = document.getElementById("toastBanner");
+      el.textContent = "✔ " + msg;
+      el.classList.remove("opacity-0", "translate-y-6");
+      el.classList.add("opacity-100", "translate-y-0");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        el.classList.remove("opacity-100", "translate-y-0");
+        el.classList.add("opacity-0", "translate-y-6");
+      }, 2200);
+    }
+
+    function copyTextToClipboard(text, successMsg) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        showToast(successMsg || "Copiado al portapapeles");
+      } catch (e) {
+        showToast("No se pudo copiar");
+      }
+      document.body.removeChild(ta);
+    }
+
+    // =========================================================================
+    // NAVEGACIÓN ENTRE APARTADOS (GENERADOR / COMBOS / MEJORES / MIS SENSIS)
+    // =========================================================================
+    function switchTab(tabName) {
+      state.activeTab = tabName;
+      ["generator", "combos", "best", "saved"].forEach(t => {
+        document.getElementById("panel-" + t).classList.toggle("hidden", t !== tabName);
+      });
+
+      document.querySelectorAll(".top-tab").forEach(btn => {
+        const active = btn.getAttribute("data-tab") === tabName;
+        if (active) {
+          btn.style.background = "var(--accent-primary)";
+          btn.style.color = "var(--accent-contrast)";
+        } else {
+          btn.style.background = "transparent";
+          btn.style.color = "var(--text-secondary)";
+        }
+      });
+
+      document.querySelectorAll(".side-nav").forEach(btn => {
+        const active = btn.getAttribute("data-tab") === tabName;
+        btn.style.borderColor = active ? "var(--accent-primary)" : "var(--border-subtle)";
+        btn.style.color = active ? "var(--accent-primary)" : "var(--text-primary)";
+      });
+
+      closeSidebar();
+      if (tabName === "saved") renderSavedPanel();
+    }
+
+    function openSidebar() {
+      document.getElementById("sidebar").classList.remove("-translate-x-full");
+      document.getElementById("drawerBackdrop").classList.remove("hidden");
+    }
+    function closeSidebar() {
+      document.getElementById("sidebar").classList.add("-translate-x-full");
+      document.getElementById("drawerBackdrop").classList.add("hidden");
+    }
+
+    // =========================================================================
+    // NAVEGACIÓN DE PASOS DEL GENERADOR (1 -> 2 -> 3 -> 4 -> SCAN -> 5)
+    // =========================================================================
+    function goToGenStep(step) {
+      if (scanTimer) {
+        clearInterval(scanTimer);
+        scanTimer = null;
+      }
+      ["genStep-1", "genStep-2", "genStep-3", "genStep-4", "genStep-scan", "genStep-5"].forEach(id => {
+        document.getElementById(id).classList.add("hidden");
+      });
+      const map = { 1: "genStep-1", 2: "genStep-2", 3: "genStep-3", 4: "genStep-4", scan: "genStep-scan", 5: "genStep-5" };
+      document.getElementById(map[step]).classList.remove("hidden");
+
+      for (let i = 1; i <= 5; i++) {
+        const pill = document.getElementById("stepChip-" + i);
+        if (i === step) {
+          pill.style.borderColor = "var(--accent-primary)";
+          pill.style.background = "rgba(0, 240, 255, 0.14)";
+          pill.style.color = "var(--accent-primary)";
+        } else if (typeof step === "number" && i < step) {
+          pill.style.borderColor = "var(--accent-green)";
+          pill.style.color = "var(--accent-green)";
+          pill.style.background = "var(--bg-card)";
+        } else {
+          pill.style.borderColor = "var(--border-subtle)";
+          pill.style.color = "var(--text-secondary)";
+          pill.style.background = "var(--bg-card)";
+        }
+      }
+
+      if (step === 2) {
+        document.getElementById("badgeStep2Device").textContent = state.selectedDevice.name.toUpperCase();
+      }
+      if (step === 3) {
+        document.getElementById("badgeStep3Summary").textContent =
+          state.selectedDevice.name.toUpperCase() + " · " + state.curve;
+      }
+      if (step === 4) {
+        document.getElementById("badgeStep4Summary").textContent =
+          state.curve + " · " + (state.useDpi ? "CON DPI" : "SIN DPI");
+      }
+    }
+
+    // =========================================================================
+    // PASO 1: RENDER MARCAS, LISTA DE MODELOS Y CONEXIÓN A INTERNET + IA
+    // =========================================================================
+    function renderBrandsRow() {
+      const row = document.getElementById("brandPillsRow");
+      row.innerHTML = BRANDS_LIST.map(b => {
+        const active = state.selectedBrand === b;
+        const style = active
+          ? "background: var(--accent-primary); color: var(--accent-contrast); border: 1px solid var(--accent-primary);"
+          : "background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border-subtle);";
+        return `<button type="button" data-brand="${b}" style="${style}"
+          class="px-3 py-1.5 rounded-full font-mono-hud text-[10px] font-extrabold whitespace-nowrap cursor-pointer transition-all">${b}</button>`;
+      }).join("");
+
+      row.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.selectedBrand = btn.getAttribute("data-brand");
+          renderBrandsRow();
+          renderDevicesList();
+        });
+      });
+    }
+
+    function renderDevicesList() {
+      const q = state.searchQuery.trim().toLowerCase();
+      const filtered = DEVICES.filter(d => {
+        const okBrand = state.selectedBrand === "TODOS" || d.brand === state.selectedBrand;
+        const okQ = !q || d.name.toLowerCase().includes(q) || d.brand.toLowerCase().includes(q);
+        return okBrand && okQ;
+      });
+
+      document.getElementById("filteredCountBadge").textContent = filtered.length + " MODELOS";
+      document.getElementById("dbCounterSub").textContent = DEVICES.length + " MODELOS · 24 MARCAS · IA ONLINE";
+      document.getElementById("sidebarTotalCount").textContent = DEVICES.length + " MODELOS";
+
+      const box = document.getElementById("deviceListBox");
+      if (!filtered.length) {
+        box.innerHTML = `<div class="p-4 rounded-xl glass-card text-center text-xs" style="color: var(--text-secondary);">
+          No está en el catálogo local. Usa el botón de abajo para <b>buscarlo en Internet y calibrarlo con IA</b>.
+        </div>`;
+      } else {
+        box.innerHTML = filtered.slice(0, 85).map(d => {
+          const isSel = state.selectedDevice && state.selectedDevice.id === d.id;
+          const borderStyle = isSel ? "border-color: var(--accent-green);" : "";
+          const badgeStyle = isSel
+            ? "background: rgba(0,255,136,0.18); color: var(--accent-green);"
+            : "background: rgba(0,240,255,0.15); color: var(--accent-primary);";
+
+          return `
+            <button type="button" data-devid="${d.id}" style="${borderStyle}"
+              class="w-full p-3 rounded-xl glass-card flex items-center justify-between gap-2 text-left transition-all cursor-pointer">
+              <div>
+                <div class="text-xs sm:text-sm font-extrabold">
+                  ${d.name} ${d.isOnlineAi ? '<span class="font-mono-hud text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">IA WEB</span>' : ''}
+                </div>
+                <div class="font-mono-hud text-[10px] mt-0.5" style="color: var(--text-secondary);">
+                  ${d.brand} · ${d.hz} Hz · DPI base ${d.factoryDpi} dp
+                </div>
+              </div>
+              <span style="${badgeStyle}" class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg shrink-0">
+                ${isSel ? "ACTIVO →" : "ELEGIR →"}
+              </span>
+            </button>
+          `;
+        }).join("");
+
+        box.querySelectorAll("button[data-devid]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = parseInt(btn.getAttribute("data-devid"), 10);
+            const dev = DEVICES.find(x => x.id === id);
+            if (!dev) return;
+            state.selectedDevice = dev;
+            state.variantIdx = 0;
+            renderDevicesList();
+            goToGenStep(2);
+          });
+        });
+      }
+
+      // Actualizar texto dinámico de búsqueda en Internet
+      const rawQuery = state.searchQuery.trim();
+      const descEl = document.getElementById("internetAiDesc");
+      const btnEl = document.getElementById("searchInternetAiBtn");
+      if (rawQuery.length >= 2) {
+        descEl.innerHTML = `Conectar a Internet para analizar especificaciones táctiles de <b style="color: var(--text-primary);">${rawQuery.toUpperCase()}</b> y generar su configuración calibrada.`;
+        btnEl.textContent = `🌐 CONECTAR A INTERNET Y GENERAR "${rawQuery.toUpperCase()}"`;
+      } else {
+        descEl.textContent = "¿Tu móvil no está en la lista? Escribe el nombre arriba y conéctate a Internet para detectar su tasa de refresco, densidad táctil y generar su sensibilidad calibrada.";
+        btnEl.textContent = "🌐 BUSCAR MODELO EN INTERNET CON IA";
+      }
+    }
+
+    async function connectInternetAndGenerateDevice() {
+      let queryName = state.searchQuery.trim();
+      if (!queryName) {
+        queryName = prompt("Escribe la marca y modelo exacto de tu celular (ej. Honor X6c, Vivo Y29s, Realme Note 60):") || "";
+        queryName = queryName.trim();
+        if (!queryName) return;
+      }
+
+      const btnEl = document.getElementById("searchInternetAiBtn");
+      const oldLabel = btnEl.textContent;
+      btnEl.disabled = true;
+      btnEl.textContent = "⏳ CONECTANDO A INTERNET Y ANALIZANDO HARDWARE...";
+
+      // Consulta real ligera a Wikipedia/web en segundo plano con fallback táctico inmediato
+      let detectedHz = 90;
+      let detectedDpi = 392;
+      const lower = queryName.toLowerCase();
+
+      if (lower.includes("pro") || lower.includes("ultra") || lower.includes("rog") || lower.includes("redmagic") || lower.includes("120") || lower.includes("5g")) {
+        detectedHz = 120;
+        detectedDpi = 412;
+      } else if (lower.includes("lite") || lower.includes("c") || lower.includes("a0") || lower.includes("smart")) {
+        detectedHz = 90;
+        detectedDpi = 360;
+      }
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2200);
+        const resp = await fetch(
+          `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(queryName + " smartphone")}&format=json&origin=*`,
+          { signal: controller.signal }
+        );
+        clearTimeout(timeoutId);
+        if (resp.ok) {
+          const data = await resp.json();
+          const snippet = JSON.stringify(data?.query?.search || "").toLowerCase();
+          if (snippet.includes("144 hz") || snippet.includes("144hz")) detectedHz = 144;
+          else if (snippet.includes("120 hz") || snippet.includes("120hz") || snippet.includes("amoled")) detectedHz = 120;
+        }
+      } catch (e) {
+        // Si no hay red externa o bloquea CORS, aplica perfil heurístico táctico al instante
+      }
+
+      let detectedBrand = "ONLINE IA";
+      for (const b of Object.keys(BRAND_MODELS)) {
+        if (lower.includes(b.toLowerCase())) {
+          detectedBrand = b;
+          break;
+        }
+      }
+
+      const formattedName = queryName.replace(/\w/g, c => c.toUpperCase());
+      let existing = DEVICES.find(d => d.name.toLowerCase() === formattedName.toLowerCase());
+      if (!existing) {
+        existing = {
+          id: DEVICES.length + 1,
+          brand: detectedBrand,
+          name: formattedName,
+          factoryDpi: detectedDpi,
+          hz: detectedHz,
+          isOnlineAi: true
+        };
+        DEVICES.unshift(existing);
+      }
+
+      state.selectedDevice = existing;
+      state.selectedBrand = "TODOS";
+      state.variantIdx = 0;
+
+      btnEl.disabled = false;
+      btnEl.textContent = oldLabel;
+
+      renderBrandsRow();
+      renderDevicesList();
+      showToast(`Perfil IA creado: ${existing.name} (${existing.hz} Hz)`);
+      goToGenStep(2);
+    }
+
+    // =========================================================================
+    // MOTOR DE CÁLCULO DE SENSIBILIDAD Y ESCANEO
+    // =========================================================================
+    function buildSensiConfig(device, curve, useDpi, btnSize, weapon, variant) {
+      const curveBase = {
+        BAJA:  { g: 158, pr: 142, x2: 150, x4: 136, awm: 88,  cam: 148 },
+        MEDIA: { g: 182, pr: 164, x2: 174, x4: 158, awm: 100, cam: 170 },
+        ALTA:  { g: 194, pr: 182, x2: 186, x4: 174, awm: 112, cam: 184 }
+      }[curve] || { g: 182, pr: 164, x2: 174, x4: 158, awm: 100, cam: 170 };
+
+      const weaponAdj = {
+        "TODAS": { g: 0, pr: 0, x2: 0, x4: 0 },
+        "AR (SCAR/AK)": { g: -2, pr: 2, x2: 4, x4: 5 },
+        "SMG (MP5/MP40)": { g: 4, pr: 5, x2: 2, x4: -2 },
+        "DMR (AC80/WOODPECKER/SVD)": { g: -4, pr: -2, x2: 3, x4: 6 },
+        "ESCOPETAS": { g: 6, pr: 6, x2: 0, x4: -4 },
+        "FRANCO": { g: -3, pr: -2, x2: 0, x4: 2 }
+      }[weapon] || { g: 0, pr: 0, x2: 0, x4: 0 };
+
+      const hzMod = device.hz >= 120 ? -3 : (device.hz <= 60 ? 4 : 0);
+      const dpiMod = useDpi ? 3 : -2;
+      const clamp = v => Math.max(50, Math.min(200, Math.round(v)));
+      const jitter = idx => {
+        if (!variant) return 0;
+        const seq = [3, -4, 5, -3, 4, -5];
+        return seq[(variant + idx) % seq.length];
+      };
+
+      const values = {
+        "General": clamp(curveBase.g + weaponAdj.g + hzMod + dpiMod + jitter(0)),
+        "Punto Rojo": clamp(curveBase.pr + weaponAdj.pr + hzMod + dpiMod + jitter(1)),
+        "Mira 2x": clamp(curveBase.x2 + weaponAdj.x2 + hzMod + dpiMod + jitter(2)),
+        "Mira 4x": clamp(curveBase.x4 + weaponAdj.x4 + hzMod + dpiMod + jitter(3)),
+        "Mira Francotirador": clamp(curveBase.awm + Math.round(hzMod * 0.5) + jitter(4)),
+        "Cámara 360°": clamp(curveBase.cam + hzMod + dpiMod + jitter(5))
+      };
+
+      const btnMap = { PEQUEÑO: [36, 42, 40], MEDIANO: [45, 52, 48], GRANDE: [55, 64, 58] };
+      const bInfo = btnMap[btnSize] || [45, 52, 48];
+      const fireBtn = Math.max(bInfo[0], Math.min(bInfo[1], bInfo[2] + (variant ? ((variant % 3) - 1) * 2 : 0)));
+
+      const dpiLow = device.factoryDpi + 45;
+      const dpiMid = device.factoryDpi + 95;
+      const dpiHigh = device.factoryDpi + 145;
+      let activeDpi = device.factoryDpi;
+      if (useDpi) {
+        const baseDpi = curve === "BAJA" ? dpiLow : (curve === "ALTA" ? dpiHigh : dpiMid);
+        activeDpi = Math.min(720, baseDpi + (variant ? ((variant % 4) - 1) * 15 : 0));
+      }
+
+      const tips = {
+        ALTA: "TIP TÁCTICO: Arrastre corto en forma de J desde el pecho hacia la cabeza en duelos cercanos.",
+        MEDIA: "TIP TÁCTICO: Arrastre progresivo y firme desde el pecho hacia la cabeza sin sobrepasar el objetivo.",
+        BAJA: "TIP TÁCTICO: Deslizamiento largo y constante para fijar la mira en distancias medias y largas."
+      };
+
+      return {
+        device: device.name,
+        brand: device.brand,
+        hz: device.hz,
+        isOnlineAi: !!device.isOnlineAi,
+        curve,
+        useDpi,
+        btnSize,
+        weapon,
+        factoryDpi: device.factoryDpi,
+        activeDpi,
+        dpiScale: { low: dpiLow, mid: dpiMid, high: dpiHigh },
+        fireBtn,
+        fireRange: `${bInfo[0]}% – ${bInfo[1]}%`,
+        values,
+        tip: tips[curve] || tips.MEDIA
+      };
+    }
+
+    function runScanAndShowResult(incrementVariant) {
+      goToGenStep("scan");
+      const pctEl = document.getElementById("scanPctText");
+      const titleEl = document.getElementById("scanPhaseTitle");
+      const fillEl = document.getElementById("scanBarFill");
+      const logEl = document.getElementById("scanLogBox");
+
+      pctEl.textContent = "0%";
+      fillEl.style.width = "0%";
+      logEl.innerHTML = "";
+
+      const phases = [
+        { p: 28, t: "ANALIZANDO PANEL TÁCTIL...", log: `> Dispositivo: ${state.selectedDevice.name} (${state.selectedDevice.hz} Hz)` },
+        { p: 58, t: "AJUSTANDO ALGORITMO HEADSHOT...", log: `> Curva: ${state.curve} · DPI: ${state.useDpi ? "CON DPI" : "SIN DPI"}` },
+        { p: 86, t: "CALIBRANDO BOTÓN DE DISPARO...", log: `> Botón ${state.btnSize} · Enfoque ${state.weapon}` },
+        { p: 100, t: "SENSIBILIDAD CALIBRADA LISTA", log: "> 6 ejes de mira generados con éxito." }
+      ];
+
+      let step = 0;
+      scanTimer = setInterval(() => {
+        if (step >= phases.length) {
+          clearInterval(scanTimer);
+          scanTimer = null;
+          if (incrementVariant) state.variantIdx += 1;
+          state.currentResult = buildSensiConfig(
+            state.selectedDevice, state.curve, state.useDpi, state.btnSize, state.weapon, state.variantIdx
+          );
+          renderFinalResult(state.currentResult);
+          goToGenStep(5);
+          if (incrementVariant) showToast(`Variante #${state.variantIdx} generada`);
+          return;
+        }
+        const ph = phases[step];
+        pctEl.textContent = ph.p + "%";
+        fillEl.style.width = ph.p + "%";
+        titleEl.textContent = ph.t;
+        const line = document.createElement("div");
+        line.textContent = ph.log;
+        logEl.appendChild(line);
+        step++;
+      }, 170);
+    }
+
+    // =========================================================================
+    // PASO 5: RENDER TARJETA FINAL CON SLIDERS EDITABLES EN VIVO
+    // =========================================================================
+    function renderFinalResult(res) {
+      document.getElementById("resDeviceTitle").textContent = res.device.toUpperCase();
+
+      const pills = [
+        `<span class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg glass-card" style="color: var(--accent-primary);">${res.brand}</span>`,
+        `<span class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg glass-card" style="color: var(--accent-green);">CURVA ${res.curve}</span>`,
+        `<span class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg glass-card">${res.useDpi ? "CON DPI" : "SIN DPI"}</span>`,
+        `<span class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg glass-card">BOTÓN ${res.btnSize}</span>`,
+        res.isOnlineAi ? `<span class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg" style="background: rgba(0,255,136,0.16); color: var(--accent-green);">🌐 IA ONLINE</span>` : "",
+        state.variantIdx > 0 ? `<span class="font-mono-hud text-[10px] font-extrabold px-2.5 py-1 rounded-lg" style="background: rgba(255,42,85,0.16); color: #ff2a55;">VARIANTE #${state.variantIdx}</span>` : ""
+      ].join("");
+      document.getElementById("resMetaPills").innerHTML = pills;
+
+      // Filtro de armas en la misma tarjeta
+      const wRow = document.getElementById("weaponPillsRow");
+      wRow.innerHTML = WEAPONS.map(w => {
+        const active = state.weapon === w;
+        const st = active
+          ? "background: var(--accent-primary); color: var(--accent-contrast); border: 1px solid var(--accent-primary);"
+          : "background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border-subtle);";
+        return `<button type="button" data-weapon="${w}" style="${st}"
+          class="px-2.5 py-1 rounded-full font-mono-hud text-[10px] font-extrabold whitespace-nowrap cursor-pointer">${w}</button>`;
+      }).join("");
+
+      wRow.querySelectorAll("button").forEach(b => {
+        b.addEventListener("click", () => {
+          state.weapon = b.getAttribute("data-weapon");
+          state.currentResult = buildSensiConfig(
+            state.selectedDevice, state.curve, state.useDpi, state.btnSize, state.weapon, state.variantIdx
+          );
+          renderFinalResult(state.currentResult);
+          showToast("Enfoque: " + state.weapon);
+        });
+      });
+
+      // 6 Sliders interactivos (0 - 200)
+      const slidersBox = document.getElementById("resSlidersList");
+      slidersBox.innerHTML = Object.entries(res.values).map(([label, val]) => `
+        <div class="glass-card rounded-xl p-3">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <span class="font-mono-hud text-xs font-extrabold">${label}</span>
+            <span data-val-for="${label}" class="font-mono-hud text-base font-black" style="color: var(--accent-primary);">${val}</span>
+          </div>
+          <input type="range" min="0" max="200" value="${val}" data-slider-for="${label}" class="sensi-range" />
+        </div>
+      `).join("");
+
+      slidersBox.querySelectorAll("input[data-slider-for]").forEach(inp => {
+        inp.addEventListener("input", e => {
+          const key = e.target.getAttribute("data-slider-for");
+          const num = parseInt(e.target.value, 10);
+          state.currentResult.values[key] = num;
+          const span = slidersBox.querySelector(`span[data-val-for="${key}"]`);
+          if (span) span.textContent = num;
+        });
+      });
+
+      document.getElementById("resFirePct").textContent = res.fireBtn + "%";
+      document.getElementById("resFireDesc").textContent = `Rango ${res.btnSize.toLowerCase()} (${res.fireRange})`;
+      const circlePx = Math.max(14, Math.min(30, Math.round(res.fireBtn * 0.45)));
+      const circleEl = document.getElementById("firePreviewCircle");
+      circleEl.style.width = circlePx + "px";
+      circleEl.style.height = circlePx + "px";
+
+      document.getElementById("resDpiNumber").textContent = res.activeDpi + " dp";
+      document.getElementById("resDpiDesc").textContent = res.useDpi
+        ? `Fábrica: ${res.factoryDpi} dp · Sugerido`
+        : `Fábrica: ${res.factoryDpi} dp · Sin modificar`;
+
+      document.getElementById("resCurveTag").textContent = "CURVA " + res.curve;
+      document.getElementById("scaleDpiLow").textContent = res.dpiScale.low + " dp";
+      document.getElementById("scaleDpiMid").textContent = res.dpiScale.mid + " dp";
+      document.getElementById("scaleDpiHigh").textContent = res.dpiScale.high + " dp";
+      document.getElementById("tacticalTipBox").textContent = res.tip;
+    }
+
+    // =========================================================================
+    // APARTADOS SECUNDARIOS: COMBOS, MEJORES SENSIS Y MIS SENSIS GUARDADAS
+    // =========================================================================
+    function renderCombosPanel() {
+      const box = document.getElementById("combosListBox");
+      box.innerHTML = COMBOS_DATA.map((c, idx) => `
+        <div class="glass-card rounded-2xl p-3.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-black" style="color: var(--accent-primary);">${c.title}</span>
+            <span class="font-mono-hud text-[9px] font-extrabold px-2 py-0.5 rounded-full"
+              style="background: rgba(0,255,136,0.15); color: var(--accent-green);">${c.badge}</span>
+          </div>
+          <p class="text-xs mt-1 leading-relaxed" style="color: var(--text-secondary);">${c.desc}</p>
+          <div class="flex flex-wrap gap-1.5 mt-2.5">
+            ${c.skills.map(s => `<span class="font-mono-hud text-[10px] font-bold px-2.5 py-1 rounded-lg"
+              style="background: var(--bg-input); border: 1px solid var(--border-subtle);">${s}</span>`).join("")}
+          </div>
+          <button type="button" data-copycombo="${idx}"
+            class="mt-3 w-full h-9 rounded-xl font-mono-hud text-[10px] font-extrabold uppercase cursor-pointer"
+            style="background: rgba(0,240,255,0.14); color: var(--accent-primary); border: 1px solid var(--border-main);">
+            ⎘ COPIAR COMBO DE HABILIDADES
+          </button>
+        </div>
+      `).join("");
+
+      box.querySelectorAll("button[data-copycombo]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const item = COMBOS_DATA[parseInt(btn.getAttribute("data-copycombo"), 10)];
+          if (!item) return;
+          copyTextToClipboard(`${item.title}
+${item.skills.join(" | ")}`, "Combo copiado");
+        });
+      });
+    }
+
+    function renderBestPanel() {
+      const brandSel = document.getElementById("bestBrandFilter");
+      if (brandSel.options.length === 1) {
+        [...new Set(BEST_PRESETS.map(p => p.brand))].forEach(b => {
+          const opt = document.createElement("option");
+          opt.value = b;
+          opt.textContent = b;
+          brandSel.appendChild(opt);
+        });
+      }
+
+      const bFilter = brandSel.value;
+      const cFilter = document.getElementById("bestCurveFilter").value;
+      const list = BEST_PRESETS.filter(p =>
+        (bFilter === "ALL" || p.brand === bFilter) &&
+        (cFilter === "ALL" || p.curve === cFilter)
+      );
+
+      const box = document.getElementById("bestSensisListBox");
+      box.innerHTML = list.map(p => {
+        const userVote = state.votes[p.id] || 0;
+        const upCount = p.up + (userVote === 1 ? 1 : 0);
+        const downCount = p.down + (userVote === -1 ? 1 : 0);
+
+        return `
+          <div class="glass-card rounded-2xl p-3.5">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <span class="font-mono-hud text-[9px] font-extrabold px-2 py-0.5 rounded"
+                  style="background: rgba(0,240,255,0.14); color: var(--accent-primary);">${p.brand}</span>
+                <h3 class="text-sm sm:text-base font-black mt-1">${p.deviceName}</h3>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button type="button" data-vote="${p.id}:1"
+                  class="px-2 py-1 rounded-lg font-mono-hud text-[10px] font-extrabold cursor-pointer"
+                  style="background: ${userVote === 1 ? 'var(--accent-green)' : 'rgba(0,255,136,0.14)'}; color: ${userVote === 1 ? '#05070a' : 'var(--accent-green)'};">
+                  ▲ ${upCount}
+                </button>
+                <button type="button" data-vote="${p.id}:-1"
+                  class="px-2 py-1 rounded-lg font-mono-hud text-[10px] font-extrabold cursor-pointer"
+                  style="background: ${userVote === -1 ? '#ff2a55' : 'rgba(255,42,85,0.14)'}; color: ${userVote === -1 ? '#fff' : '#ff2a55'};">
+                  ▼ ${downCount}
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-4 gap-1.5 mt-2.5 text-center font-mono-hud">
+              <div class="p-2 rounded-xl" style="background: var(--bg-input); border: 1px solid var(--border-subtle);">
+                <span class="block text-[9px]" style="color: var(--text-secondary);">GENERAL</span>
+                <span class="text-xs font-black">${p.g}</span>
+              </div>
+              <div class="p-2 rounded-xl" style="background: var(--bg-input); border: 1px solid var(--border-subtle);">
+                <span class="block text-[9px]" style="color: var(--text-secondary);">P. ROJO</span>
+                <span class="text-xs font-black">${p.pr}</span>
+              </div>
+              <div class="p-2 rounded-xl" style="background: var(--bg-input); border: 1px solid var(--border-subtle);">
+                <span class="block text-[9px]" style="color: var(--text-secondary);">2X / 4X</span>
+                <span class="text-xs font-black">${p.x2}/${p.x4}</span>
+              </div>
+              <div class="p-2 rounded-xl" style="background: var(--bg-input); border: 1px solid var(--border-subtle);">
+                <span class="block text-[9px]" style="color: var(--text-secondary);">BOTÓN</span>
+                <span class="text-xs font-black" style="color: var(--accent-green);">${p.btn}%</span>
+              </div>
+            </div>
+
+            <button type="button" data-loadbest="${p.id}"
+              class="mt-2.5 w-full h-9 rounded-xl font-mono-hud text-[10px] font-extrabold uppercase cursor-pointer"
+              style="background: var(--accent-primary); color: var(--accent-contrast);">
+              ⚡ CARGAR ESTE PERFIL EN EL GENERADOR
+            </button>
+          </div>
+        `;
+      }).join("");
+
+      box.querySelectorAll("button[data-vote]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const [id, dirStr] = btn.getAttribute("data-vote").split(":");
+          const dir = parseInt(dirStr, 10);
+          state.votes[id] = state.votes[id] === dir ? 0 : dir;
+          localStorage.setItem("sensisys_votes_v3", JSON.stringify(state.votes));
+          renderBestPanel();
+        });
+      });
+
+      box.querySelectorAll("button[data-loadbest]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const p = BEST_PRESETS.find(x => x.id === btn.getAttribute("data-loadbest"));
+          if (!p) return;
+          const dev = DEVICES.find(d => d.name === p.deviceName) || { id: 999, brand: p.brand, name: p.deviceName, factoryDpi: 411, hz: 120 };
+          state.selectedDevice = dev;
+          state.curve = p.curve;
+          state.useDpi = p.useDpi;
+          state.btnSize = p.btnSize;
+          state.variantIdx = 0;
+          const built = buildSensiConfig(dev, p.curve, p.useDpi, p.btnSize, "TODAS", 0);
+          built.values = {
+            "General": p.g, "Punto Rojo": p.pr, "Mira 2x": p.x2,
+            "Mira 4x": p.x4, "Mira Francotirador": p.awm, "Cámara 360°": p.cam
+          };
+          built.fireBtn = p.btn;
+          state.currentResult = built;
+          switchTab("generator");
+          renderFinalResult(built);
+          goToGenStep(5);
+          showToast("Cargado: " + p.deviceName);
+        });
+      });
+    }
+
+    function syncSavedCounters() {
+      const count = state.savedList.length;
+      document.getElementById("savedSideBadge").textContent = count;
+      document.getElementById("savedHeaderCount").textContent = count + (count === 1 ? " PERFIL" : " PERFILES");
+    }
+
+    function renderSavedPanel() {
+      syncSavedCounters();
+      const box = document.getElementById("savedListBox");
+      if (!state.savedList.length) {
+        box.innerHTML = `<div class="p-6 rounded-2xl glass-card text-center text-xs" style="color: var(--text-secondary);">
+          Aún no tienes sensibilidades guardadas. Genera una configuración y pulsa <b>GUARDAR EN MIS SENSIS</b>.
+        </div>`;
+        return;
+      }
+
+      box.innerHTML = state.savedList.map((item, idx) => `
+        <div class="glass-card rounded-2xl p-3.5">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="text-sm font-black">${item.device}</div>
+              <div class="font-mono-hud text-[10px] mt-0.5" style="color: var(--text-secondary);">
+                Curva ${item.curve} · ${item.useDpi ? item.activeDpi + " dp" : "Sin DPI"} · Botón ${item.fireBtn}%
+              </div>
+              <div class="font-mono-hud text-[11px] font-bold mt-1" style="color: var(--accent-primary);">
+                G:${item.values["General"]} · PR:${item.values["Punto Rojo"]} · 2X:${item.values["Mira 2x"]} · 4X:${item.values["Mira 4x"]}
+              </div>
+            </div>
+            <div class="flex flex-col gap-1.5 shrink-0">
+              <button type="button" data-loadsaved="${idx}"
+                class="px-3 py-1.5 rounded-xl font-mono-hud text-[10px] font-extrabold cursor-pointer"
+                style="background: var(--accent-primary); color: var(--accent-contrast);">
+                CARGAR
+              </button>
+              <button type="button" data-delsaved="${idx}"
+                class="px-3 py-1.5 rounded-xl font-mono-hud text-[10px] font-extrabold cursor-pointer"
+                style="background: rgba(255,42,85,0.16); color: #ff2a55;">
+                BORRAR
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join("");
+
+      box.querySelectorAll("button[data-loadsaved]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const item = state.savedList[parseInt(btn.getAttribute("data-loadsaved"), 10)];
+          if (!item) return;
+          state.currentResult = JSON.parse(JSON.stringify(item));
+          switchTab("generator");
+          renderFinalResult(state.currentResult);
+          goToGenStep(5);
+          showToast("Perfil cargado");
+        });
+      });
+
+      box.querySelectorAll("button[data-delsaved]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = parseInt(btn.getAttribute("data-delsaved"), 10);
+          state.savedList.splice(idx, 1);
+          localStorage.setItem("sensisys_saved_v3", JSON.stringify(state.savedList));
+          renderSavedPanel();
+          showToast("Perfil eliminado");
+        });
+      });
+    }
+
+    // =========================================================================
+    // REPRODUCTOR MP3 REAL
+    // =========================================================================
+    const audioEl = document.getElementById("realAudioPlayer");
+    const playPauseBtn = document.getElementById("playPauseAudioBtn");
+    const audioTrackLbl = document.getElementById("audioTrackLabel");
+
+    document.getElementById("audioToggleBtn").addEventListener("click", () => {
+      const drw = document.getElementById("audioDrawer");
+      const hidden = drw.classList.contains("hidden");
+      drw.classList.toggle("hidden", !hidden);
+      drw.classList.toggle("flex", hidden);
+    });
+
+    document.getElementById("saveMp3UrlBtn").addEventListener("click", () => {
+      let url = document.getElementById("mp3UrlInput").value.trim();
+      if (!url) return showToast("Ingresa una URL .mp3");
+      if (url.includes("github.com") && url.includes("/blob/")) {
+        url = url.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+      }
+      localStorage.setItem("sensisys_mp3_url", url);
+      audioEl.src = url;
+      audioTrackLbl.textContent = "URL MP3 LISTA";
+      audioEl.play().then(() => {
+        playPauseBtn.textContent = "❚❚ PAUSE";
+        showToast("Reproduciendo MP3");
+      }).catch(() => showToast("URL cargada · Pulsa Play"));
+    });
+
+    document.getElementById("mp3FileInput").addEventListener("change", e => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      audioEl.src = URL.createObjectURL(f);
+      audioTrackLbl.textContent = f.name.slice(0, 20).toUpperCase();
+      audioEl.play().then(() => {
+        playPauseBtn.textContent = "❚❚ PAUSE";
+        showToast("Archivo cargado");
+      }).catch(() => showToast("Archivo listo"));
+    });
+
+    playPauseBtn.addEventListener("click", () => {
+      if (!audioEl.src) return showToast("Carga una URL o archivo MP3 primero");
+      if (audioEl.paused) {
+        audioEl.play().then(() => playPauseBtn.textContent = "❚❚ PAUSE").catch(() => {});
+      } else {
+        audioEl.pause();
+        playPauseBtn.textContent = "▶ PLAY";
+      }
+    });
+
+    document.getElementById("audioVolumeSlider").addEventListener("input", e => {
+      audioEl.volume = parseFloat(e.target.value);
+    });
+
+    document.getElementById("clearAudioBtn").addEventListener("click", () => {
+      audioEl.pause();
+      audioEl.removeAttribute("src");
+      localStorage.removeItem("sensisys_mp3_url");
+      document.getElementById("mp3UrlInput").value = "";
+      audioTrackLbl.textContent = "SIN PISTA";
+      playPauseBtn.textContent = "▶ PLAY";
+      showToast("Audio limpiado");
+    });
+
+    // =========================================================================
+    // INICIALIZACIÓN DE EVENTOS
+    // =========================================================================
+    document.addEventListener("DOMContentLoaded", () => {
+      // Tema (TÁCTICO oscuro vs ÉLITE azul hielo/blanco)
+      const savedTheme = localStorage.getItem("sensisys_ui_theme") || "tactico";
+      document.documentElement.setAttribute("data-theme", savedTheme);
+      document.getElementById("themeLabel").textContent = savedTheme === "elite" ? "ÉLITE" : "TÁCTICO";
+
+      document.getElementById("themeToggleBtn").addEventListener("click", () => {
+        const cur = document.documentElement.getAttribute("data-theme");
+        const next = cur === "tactico" ? "elite" : "tactico";
+        document.documentElement.setAttribute("data-theme", next);
+        localStorage.setItem("sensisys_ui_theme", next);
+        document.getElementById("themeLabel").textContent = next === "elite" ? "ÉLITE" : "TÁCTICO";
+        showToast("Interfaz: " + (next === "elite" ? "ÉLITE (Azul Hielo)" : "TÁCTICA (Oscura HUD)"));
+      });
+
+      // Llamas (Carmesí -> Cian -> Off)
+      syncFireButtonUI();
+      document.getElementById("fireModeBtn").addEventListener("click", () => {
+        fireMode = fireMode === "crimson" ? "cyan" : (fireMode === "cyan" ? "off" : "crimson");
+        localStorage.setItem("sensisys_fire_mode", fireMode);
+        syncFireButtonUI();
+        showToast("Llamas: " + (fireMode === "crimson" ? "Carmesí" : (fireMode === "cyan" ? "Cian" : "Apagadas")));
+      });
+
+      // Menú lateral y tabs superiores
+      document.getElementById("menuOpenBtn").addEventListener("click", openSidebar);
+      document.getElementById("menuCloseBtn").addEventListener("click", closeSidebar);
+      document.getElementById("drawerBackdrop").addEventListener("click", closeSidebar);
+
+      document.querySelectorAll("[data-tab]").forEach(btn => {
+        btn.addEventListener("click", () => switchTab(btn.getAttribute("data-tab")));
+      });
+
+      // Pills de pasos
+      for (let i = 1; i <= 5; i++) {
+        document.getElementById("stepChip-" + i).addEventListener("click", () => {
+          if (i === 5 && !state.currentResult) {
+            showToast("Completa los pasos 01 a 04 primero");
+            return;
+          }
+          goToGenStep(i);
+        });
+      }
+
+      // Buscador Paso 1
+      const searchInp = document.getElementById("deviceSearchInput");
+      const clearSearchBtn = document.getElementById("clearSearchBtn");
+      searchInp.addEventListener("input", e => {
+        state.searchQuery = e.target.value;
+        clearSearchBtn.classList.toggle("hidden", !state.searchQuery.length);
+        renderDevicesList();
+      });
+      clearSearchBtn.addEventListener("click", () => {
+        state.searchQuery = "";
+        searchInp.value = "";
+        clearSearchBtn.classList.add("hidden");
+        renderDevicesList();
+      });
+
+      document.getElementById("searchInternetAiBtn").addEventListener("click", connectInternetAndGenerateDevice);
+
+      // Paso 2: Curvas
+      document.getElementById("backTo1Btn").addEventListener("click", () => goToGenStep(1));
+      document.querySelectorAll(".curve-card").forEach(card => {
+        card.addEventListener("click", () => {
+          state.curve = card.getAttribute("data-curve");
+          goToGenStep(3);
+        });
+      });
+
+      // Paso 3: DPI
+      document.getElementById("backTo2Btn").addEventListener("click", () => goToGenStep(2));
+      document.getElementById("chooseWithDpiBtn").addEventListener("click", () => {
+        state.useDpi = true;
+        goToGenStep(4);
+      });
+      document.getElementById("chooseNoDpiBtn").addEventListener("click", () => {
+        state.useDpi = false;
+        goToGenStep(4);
+      });
+
+      // Paso 4: Botón -> Escaneo -> Paso 5
+      document.getElementById("backTo3Btn").addEventListener("click", () => goToGenStep(3));
+      document.querySelectorAll(".btn-size-card").forEach(card => {
+        card.addEventListener("click", () => {
+          state.btnSize = card.getAttribute("data-btnsize");
+          runScanAndShowResult(false);
+        });
+      });
+
+      // Paso 5: Acciones
+      document.getElementById("changeTeamBtn").addEventListener("click", () => goToGenStep(1));
+      document.getElementById("regenVariantBtn").addEventListener("click", () => runScanAndShowResult(true));
+
+      document.getElementById("copyResultBtn").addEventListener("click", () => {
+        if (!state.currentResult) return;
+        const r = state.currentResult;
+        const v = r.values;
+        const txt = [
+          "SENSI-SYS // CHALOZKY.GB",
+          `Equipo: ${r.device} | Curva: ${r.curve} | ${r.useDpi ? r.activeDpi + " dp" : "Sin DPI"}`,
+          `General: ${v["General"]} | Punto Rojo: ${v["Punto Rojo"]} | Mira 2x: ${v["Mira 2x"]} | Mira 4x: ${v["Mira 4x"]}`,
+          `Franco: ${v["Mira Francotirador"]} | Cámara 360°: ${v["Cámara 360°"]} | Botón: ${r.fireBtn}%`
+        ].join("\n");
+        copyTextToClipboard(txt, "Configuración copiada");
+      });
+
+      document.getElementById("saveResultBtn").addEventListener("click", () => {
+        if (!state.currentResult) return;
+        state.savedList.unshift(JSON.parse(JSON.stringify(state.currentResult)));
+        localStorage.setItem("sensisys_saved_v3", JSON.stringify(state.savedList));
+        syncSavedCounters();
+        showToast("Guardado en Mis Sensis");
+      });
+
+      // Filtros de Mejores Sensis
+      document.getElementById("bestBrandFilter").addEventListener("change", renderBestPanel);
+      document.getElementById("bestCurveFilter").addEventListener("change", renderBestPanel);
+
+      // Restaurar MP3 guardado
+      const savedMp3 = localStorage.getItem("sensisys_mp3_url");
+      if (savedMp3) {
+        document.getElementById("mp3UrlInput").value = savedMp3;
+        audioEl.src = savedMp3;
+        audioTrackLbl.textContent = "URL GUARDADA";
+      }
+
+      // Renders iniciales
+      renderBrandsRow();
+      renderDevicesList();
+      renderCombosPanel();
+      renderBestPanel();
+      syncSavedCounters();
+      switchTab("generator");
+      goToGenStep(1);
+    });
+  </script>
+</body>
+</html>
