@@ -130,7 +130,30 @@ html, body {
   </style>
 </head>
 <body>
-
+  <!-- PANTALLA DE ACCESO CON CONTRASEÑA -->
+  <div id="authLockScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(6, 8, 13, 0.96); backdrop-filter: blur(10px);">
+    <div class="w-full max-w-[380px] rounded-2xl glass-panel p-5 flex flex-col gap-3">
+      <div class="font-mono-hud text-[10px] font-extrabold tracking-widest uppercase" style="color: var(--accent-primary);">
+        ACCESO RESTRINGIDO · SENSI-SYS
+      </div>
+      <h2 class="text-lg font-black">CHALOZKY.GB</h2>
+      <p class="text-xs" style="color: var(--text-secondary);">
+        Ingresa la contraseña para desbloquear la terminal.
+      </p>
+      <input type="password" id="authPassInput" placeholder="Contraseña..."
+        class="hud-input w-full h-11 px-3.5 rounded-xl font-mono-hud text-xs focus:outline-none" />
+      <button type="button" id="authUnlockBtn"
+        class="w-full h-11 rounded-xl font-extrabold text-xs tracking-wider uppercase cursor-pointer"
+        style="background: var(--accent-primary); color: var(--accent-contrast);">
+        DESBLOQUEAR
+      </button>
+      <div id="authErrorMsg" class="hidden font-mono-hud text-[11px] font-bold" style="color: #ff2a55;">
+        Contraseña incorrecta.
+      </div>
+    </div>
+  </div>
+  
   <!-- CANVAS DE LLAMAS ANIMADAS A 60 FPS -->
   <canvas id="fireCanvas"></canvas>
 
